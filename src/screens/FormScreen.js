@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Modal,
   Animated,
+  PanResponder,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
@@ -32,7 +33,7 @@ const iconMap = {
 
 export default function FormScreen({ route, navigation }) {
   const [department, setDepartment] = useState(route?.params?.department || null);
-  const [showDeptPicker, setShowDeptPicker] = useState(!route?.params?.department);
+  const [showDeptPicker, setShowDeptPicker] = useState(false);
   const [title, setTitle] = useState('');
 
   useEffect(() => {
@@ -71,6 +72,31 @@ export default function FormScreen({ route, navigation }) {
   const [showAlert, setShowAlert] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const alertTimeout = useRef(null);
+  const pickerTranslateY = useRef(new Animated.Value(0)).current;
+
+  const pickerPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gs) => gs.dy > 5,
+      onPanResponderMove: (_, gs) => {
+        if (gs.dy > 0) pickerTranslateY.setValue(gs.dy);
+      },
+      onPanResponderRelease: (_, gs) => {
+        if (gs.dy > 0) {
+          Animated.timing(pickerTranslateY, {
+            toValue: 500, duration: 250, useNativeDriver: true,
+          }).start(() => {
+            setShowDeptPicker(false);
+            pickerTranslateY.setValue(0);
+          });
+        } else {
+          Animated.timing(pickerTranslateY, {
+            toValue: 0, duration: 150, useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   const checkDuplicate = useCallback((val) => {
     if (alertTimeout.current) clearTimeout(alertTimeout.current);
@@ -222,9 +248,13 @@ export default function FormScreen({ route, navigation }) {
         )}
       </ScrollView>
 
-      <Modal visible={showDeptPicker} transparent animationType="slide">
+      <Modal visible={showDeptPicker} transparent animationType="none" onShow={() => pickerTranslateY.setValue(0)}>
         <View style={styles.pickerOverlay}>
-          <View style={styles.pickerSheet}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setShowDeptPicker(false)} />
+          <Animated.View
+            style={[styles.pickerSheet, { transform: [{ translateY: pickerTranslateY }] }]}
+            {...pickerPanResponder.panHandlers}
+          >
             <View style={styles.pickerHandle} />
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>Seleccionar departamento</Text>
@@ -257,7 +287,7 @@ export default function FormScreen({ route, navigation }) {
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
+          </Animated.View>
         </View>
       </Modal>
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,13 +10,9 @@ import HomeScreen from './src/screens/HomeScreen';
 import FeedScreen from './src/screens/FeedScreen';
 import FormScreen from './src/screens/FormScreen';
 import KnowledgeScreen from './src/screens/KnowledgeScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
-
-function ProfileScreen({ navigation }) {
-  useEffect(() => { navigation.navigate('Home'); }, []);
-  return null;
-}
 
 const tabIcons = {
   Home: { active: 'home', inactive: 'home-outline' },
@@ -50,22 +46,14 @@ function CustomTabBar({ state, descriptors, navigation }) {
         }
 
         const routeIdx = state.routes.findIndex(r => r.name === name);
-        const isActive = name === 'Profile'
-          ? state.index === 0
-          : state.index === routeIdx;
+        const isActive = state.index === routeIdx;
 
         return (
           <TouchableOpacity
             key={name}
             style={styles.tabItem}
             activeOpacity={0.7}
-            onPress={() => {
-              if (name === 'Profile') {
-                navigation.navigate('Home');
-              } else {
-                navigation.navigate(name);
-              }
-            }}
+            onPress={() => navigation.navigate(name)}
           >
             <Ionicons
               name={tabIcons[name]?.[isActive ? 'active' : 'inactive'] || 'ellipse-outline'}
