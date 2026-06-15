@@ -1,0 +1,16 @@
+export const departments = [
+  { id: 1, name: 'Compras', icon: 'cart', count: '12 activas', bg: '#fff0f0' },
+  { id: 2, name: 'Tecnología', icon: 'laptop', count: '8 activas', bg: '#f0f0ff' },
+  { id: 3, name: 'Recursos Humanos', short: 'RRHH', icon: 'people', count: '5 activas', bg: '#f0fff0' },
+  { id: 4, name: 'Finanzas', icon: 'cash', count: '9 activas', bg: '#fff8f0' },
+  { id: 5, name: 'Contabilidad', icon: 'bar-chart', count: '4 activas', bg: '#f0f8ff' },
+  { id: 6, name: 'Ventas', icon: 'trending-up', count: '11 activas', bg: '#fef0ff' },
+  { id: 7, name: 'Marketing', icon: 'megaphone', count: '7 activas', bg: '#fffaf0' },
+  { id: 8, name: 'Operaciones', icon: 'settings', count: '6 activas', bg: '#f0fffa' },
+  { id: 9, name: 'Logística', icon: 'car', count: '3 activas', bg: '#fff0f8' },
+  { id: 10, name: 'Atención al Cliente', short: 'Atención', icon: 'headset', count: '14 activas', bg: '#f5fff0' },
+  { id: 11, name: 'Legal', icon: 'scale', count: '2 activas', bg: '#f8f0ff' },
+  { id: 12, name: 'Administración', icon: 'business', count: '5 activas', bg: '#f0faff' },
+  { id: 13, name: 'Auditoría', icon: 'search', count: '1 activa', bg: '#fffff0' },
+  { id: 14, name: 'Proyectos', icon: 'folder', count: '9 activas', bg: '#fff0fc' },
+];
