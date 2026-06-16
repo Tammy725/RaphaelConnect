@@ -124,6 +124,14 @@ export default function FormScreen({ route, navigation }) {
     if (showInFeed && department) {
       const initials = department.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
       const colors = ['#e74c3c', '#5b4adb', '#27ae60', '#f39c12', '#1abc9c', '#9b59b6', '#e67e22'];
+      const priorityLabel = { baja: 'baja', media: 'media', alta: 'alta' };
+      const parts = [
+        title && `Solicitó "${title}"`,
+        description && `. ${description.charAt(0).toLowerCase() + description.slice(1)}`,
+        location && `. Ubicación: ${location}`,
+        date && `. Requerido para: ${date}`,
+        `. Prioridad: ${priorityLabel[priority] || 'media'}`,
+      ].filter(Boolean);
       feedPosts.unshift({
         id: Date.now(),
         initials,
@@ -133,8 +141,8 @@ export default function FormScreen({ route, navigation }) {
         tag: 'Nuevo',
         tagIcon: 'ellipse',
         tagColor: '#5b4adb',
-        body: title || `Nueva solicitud creada en ${department}`,
-        tags: [title ? title.split(' ').slice(0, 3).join(' ') : 'Solicitud'],
+        body: parts.join(''),
+        tags: [department, priority, date].filter(Boolean),
         likes: 0,
         comments: 0,
       });
