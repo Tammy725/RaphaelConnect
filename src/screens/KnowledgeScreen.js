@@ -6,9 +6,12 @@ import {
   ScrollView,
   TextInput,
   SafeAreaView,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../constants/theme';
+import { useToast } from '../context/ToastContext';
 
 const ALL_ENTRIES = [
   {
@@ -86,8 +89,20 @@ const ALL_ENTRIES = [
   },
 ];
 
+function getDept(item) {
+  const parts = (item.subtitle || '').split('·');
+  return parts[0] ? parts[0].trim() : null;
+}
+
+function getContact(item) {
+  const row = item.rows.find(r => r.key === 'Responsable');
+  return row ? row.val : null;
+}
+
 export default function KnowledgeScreen() {
   const [query, setQuery] = useState('');
+  const { showToast } = useToast();
+  const navigation = useNavigation();
 
   const lower = query.toLowerCase().trim();
   const results = !lower
@@ -154,6 +169,51 @@ export default function KnowledgeScreen() {
                     <Text style={styles.suggestionTitle}>Sugerencia</Text>
                   </View>
                   <Text style={styles.suggestionText}>{firstTip.tip}</Text>
+                  <View style={styles.suggestionActions}>
+                    <TouchableOpacity
+                      style={styles.actionBtn}
+                      onPress={() => {
+                        const dept = getDept(firstTip);
+                        if (dept) navigation.navigate('Feed', { department: dept, filter: 'Completado' });
+                      }}
+                    >
+                      <Ionicons name="eye-outline" size={14} color={COLORS.primary} />
+                      <Text style={styles.actionLabel}>Ver detalles completos</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.actionBtn}
+                      onPress={() => {
+                        const dept = getDept(firstTip);
+                        if (dept) navigation.navigate('Form', { department: dept, template: firstTip.title });
+                        showToast('📋 Solicitud copiada');
+                      }}
+                    >
+                      <Ionicons name="copy-outline" size={14} color={COLORS.primary} />
+                      <Text style={styles.actionLabel}>Copiar solicitud anterior</Text>
+                    </TouchableOpacity>
+                    {getContact(firstTip) && (
+                      <TouchableOpacity
+                        style={styles.actionBtn}
+                        onPress={() => {
+                          const name = getContact(firstTip);
+                          showToast(`👤 ${name} — datos de contacto mostrados`);
+                        }}
+                      >
+                        <Ionicons name="person-outline" size={14} color={COLORS.primary} />
+                        <Text style={styles.actionLabel}>Contactar a {getContact(firstTip)}</Text>
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity
+                      style={[styles.actionBtn, styles.actionBtnPrimary]}
+                      onPress={() => {
+                        const dept = getDept(firstTip);
+                        navigation.navigate('Form', { department: dept || '' });
+                      }}
+                    >
+                      <Ionicons name="send-outline" size={14} color="#fff" />
+                      <Text style={[styles.actionLabel, { color: '#fff' }]}>Enviar de todas formas</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
               <View style={{ height: 20 }} />
@@ -220,4 +280,15 @@ const styles = StyleSheet.create({
   suggestionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   suggestionTitle: { fontSize: 12, fontWeight: '600', color: COLORS.primary },
   suggestionText: { fontSize: 12, color: COLORS.textTertiary, lineHeight: 18 },
+  suggestionActions: { marginTop: 12, gap: 6 },
+  actionBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 8, paddingHorizontal: 12,
+    backgroundColor: COLORS.white, borderRadius: 8,
+    borderWidth: 1, borderColor: 'rgba(91,74,219,0.15)',
+  },
+  actionBtnPrimary: {
+    backgroundColor: COLORS.primary, borderColor: COLORS.primary,
+  },
+  actionLabel: { fontSize: 13, fontWeight: '600', color: COLORS.primary },
 });
