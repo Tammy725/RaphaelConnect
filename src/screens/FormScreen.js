@@ -251,7 +251,7 @@ export default function FormScreen({ route, navigation }) {
   }, [matchedItem, closeAlert, navigation]);
 
   const handleSubmit = useCallback((skipValidation) => {
-    if (!skipValidation) {
+    if (skipValidation !== true) {
       const missing = [];
       if (!title.trim()) missing.push('Título');
       if (!description.trim()) missing.push('Descripción');
@@ -323,8 +323,8 @@ export default function FormScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        <Pressable onPress={Keyboard.dismiss}>
+      <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{flexGrow: 1}}>
+        <Pressable onPress={Keyboard.dismiss} style={{flex: 1}}>
         <View style={styles.formHeader}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('Home')}>
             <Ionicons name="chevron-back-outline" size={18} color={COLORS.primary} />
