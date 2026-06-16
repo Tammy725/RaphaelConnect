@@ -43,18 +43,11 @@ export default function FormScreen({ route, navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      setDepartment(null);
-      setTitle('');
-      setDescription('');
-      setLocation('');
-      setDate('');
-      setAmount('');
-      setPriority('media');
-      setShowInFeed(true);
       setShowLocationPicker(false);
 
       const p = route?.params || {};
       const dept = p.department;
+
       if (dept) {
         setDepartment(dept);
         setTitle(p.templateTitle || '');
@@ -63,6 +56,7 @@ export default function FormScreen({ route, navigation }) {
         setDate(p.templateDate || '');
         setAmount(p.templateAmount || '');
         setPriority('media');
+        setShowInFeed(true);
         setShowDeptPicker(false);
         navigation.setParams({
           department: undefined,
@@ -72,6 +66,25 @@ export default function FormScreen({ route, navigation }) {
           templateDate: undefined,
           templateAmount: undefined,
         });
+      } else if (draftRef.current) {
+        const draft = draftRef.current;
+        setDepartment(draft.department);
+        setTitle(draft.title);
+        setDescription(draft.description);
+        setLocation(draft.location);
+        setDate(draft.date);
+        setAmount(draft.amount);
+        setPriority(draft.priority);
+        setShowInFeed(draft.showInFeed);
+      } else {
+        setDepartment(null);
+        setTitle('');
+        setDescription('');
+        setLocation('');
+        setDate('');
+        setAmount('');
+        setPriority('media');
+        setShowInFeed(true);
       }
     }, [route, navigation])
   );
@@ -113,6 +126,21 @@ export default function FormScreen({ route, navigation }) {
   const alertTimeout = useRef(null);
   const pickerSlideAnim = useRef(new Animated.Value(0)).current;
   const { showToast } = useToast();
+  const draftRef = useRef(null);
+
+  const saveDraft = useCallback(() => {
+    draftRef.current = {
+      department,
+      title,
+      description,
+      location,
+      date,
+      amount,
+      priority,
+      showInFeed,
+    };
+    showToast('📝 Borrador guardado');
+  }, [department, title, description, location, date, amount, priority, showInFeed]);
 
   const copyPreviousRequest = useCallback(() => {
     setTitle('Compra: Aires Acondicionados Samsung');
@@ -229,7 +257,7 @@ export default function FormScreen({ route, navigation }) {
               {department && (
               <TouchableOpacity onPress={() => Alert.alert('Guardar solicitud', 'Se guardará todo lo que has escrito hasta ahora.', [
                 { text: 'Cancelar', style: 'cancel' },
-                { text: 'Guardar', onPress: () => {} },
+                { text: 'Guardar', onPress: saveDraft },
               ])} style={styles.saveBtn}>
                 <Ionicons name="save-outline" size={20} color={COLORS.text} />
                 <Text style={styles.saveLabel}>Guardar</Text>
