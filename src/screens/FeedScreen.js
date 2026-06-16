@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../constants/theme';
 import { feedPosts } from '../data/feed';
 
 export default function FeedScreen() {
+  const [posts, setPosts] = useState([...feedPosts]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setPosts([...feedPosts]);
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -19,7 +28,7 @@ export default function FeedScreen() {
       </View>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.feedList}>
-          {feedPosts.map((post) => (
+          {posts.map((post) => (
             <View key={post.id} style={styles.feedCard}>
               <View style={styles.feedHeader}>
                 <View style={[styles.feedAvatar, { backgroundColor: post.avatarBg }]}>

@@ -8,10 +8,12 @@ import {
   TouchableOpacity,
   Modal,
   Animated,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { departments } from '../data/departments';
+import { feedPosts } from '../data/feed';
 
 const iconMap = {
   cart: 'cart-outline',
@@ -68,6 +70,7 @@ export default function FormScreen({ route, navigation }) {
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
   const [priority, setPriority] = useState('media');
+  const [showInFeed, setShowInFeed] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const alertTimeout = useRef(null);
@@ -118,11 +121,29 @@ export default function FormScreen({ route, navigation }) {
   }, [closeAlert, navigation]);
 
   const handleSubmit = useCallback(() => {
+    if (showInFeed && department) {
+      const initials = department.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const colors = ['#e74c3c', '#5b4adb', '#27ae60', '#f39c12', '#1abc9c', '#9b59b6', '#e67e22'];
+      feedPosts.unshift({
+        id: Date.now(),
+        initials,
+        avatarBg: colors[Math.floor(Math.random() * colors.length)],
+        department,
+        time: 'Ahora',
+        tag: 'Nuevo',
+        tagIcon: 'ellipse',
+        tagColor: '#5b4adb',
+        body: title || `Nueva solicitud creada en ${department}`,
+        tags: [title ? title.split(' ').slice(0, 3).join(' ') : 'Solicitud'],
+        likes: 0,
+        comments: 0,
+      });
+    }
     setShowAlert(true);
     Animated.spring(slideAnim, {
       toValue: 1, useNativeDriver: true, damping: 20, stiffness: 90,
     }).start();
-  }, [slideAnim]);
+  }, [slideAnim, showInFeed, department, title]);
 
   return (
     <View style={styles.container}>
@@ -225,6 +246,19 @@ export default function FormScreen({ route, navigation }) {
           <Ionicons name="attach-outline" size={18} color={COLORS.primary} />
           <Text style={styles.attachText}>Adjuntar archivo o imagen</Text>
         </TouchableOpacity>
+
+        <View style={styles.feedToggle}>
+          <View style={styles.feedToggleLeft}>
+            <Ionicons name="pulse-outline" size={18} color={COLORS.primary} />
+            <Text style={styles.feedToggleText}>Mostrar en Actividad</Text>
+          </View>
+          <Switch
+            value={showInFeed}
+            onValueChange={setShowInFeed}
+            trackColor={{ false: '#d1d1d6', true: COLORS.primaryLight }}
+            thumbColor={showInFeed ? COLORS.primary : '#f4f3f4'}
+          />
+        </View>
 
         <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
           <Ionicons name="send-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
@@ -394,6 +428,13 @@ const styles = StyleSheet.create({
     borderRadius: 12, padding: 14,
   },
   attachText: { fontSize: 14, color: COLORS.primary, fontWeight: '500' },
+  feedToggle: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginHorizontal: 16, marginTop: 12, backgroundColor: COLORS.white,
+    borderRadius: 12, padding: 14, borderWidth: 0.5, borderColor: COLORS.border,
+  },
+  feedToggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  feedToggleText: { fontSize: 14, color: COLORS.text, fontWeight: '500' },
   submitBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     marginHorizontal: 16, marginTop: 12, backgroundColor: COLORS.primary,
