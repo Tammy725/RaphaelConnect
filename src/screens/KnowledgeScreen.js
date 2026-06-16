@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../constants/theme';
 import { useToast } from '../context/ToastContext';
 
-const ALL_ENTRIES = [
+export const ALL_ENTRIES = [
   {
     keywords: ['aire', 'acondicionado', 'hvac', 'samsung', 'frio', 'climatizacion'],
     icon: '🛒',

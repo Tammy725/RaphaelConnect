@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { departments } from '../data/departments';
 import { feedPosts } from '../data/feed';
+import { ALL_ENTRIES } from './KnowledgeScreen';
 import { useToast } from '../context/ToastContext';
 
 const iconMap = {
@@ -124,8 +125,8 @@ export default function FormScreen({ route, navigation }) {
   const [showInFeed, setShowInFeed] = useState(true);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [matchedItem, setMatchedItem] = useState(null);
   const slideAnim = useRef(new Animated.Value(0)).current;
-  const alertTimeout = useRef(null);
   const pickerSlideAnim = useRef(new Animated.Value(0)).current;
   const { showToast } = useToast();
   const draftRef = useRef(null);
@@ -144,14 +145,65 @@ export default function FormScreen({ route, navigation }) {
     showToast('📝 Borrador guardado');
   }, [department, title, description, location, date, amount, priority, showInFeed]);
 
-  const copyPreviousRequest = useCallback(() => {
-    setTitle('Compra: Aires Acondicionados Samsung');
-    setDescription('3 unidades 18,000 BTU para oficinas San Miguelito. Proveedor: Distribuidora Techno S.A.');
-    setLocation('San Miguelito');
-    setAmount('$4,200.00');
+  const copyFromMatch = useCallback(() => {
+    if (!matchedItem) return;
+    if (matchedItem.source === 'knowledge') {
+      const e = matchedItem.entry;
+      setTitle(e.title);
+      setDescription(e.rows.map(r => `${r.key}: ${r.val}`).join('. '));
+      setLocation(e.rows.find(r => r.key === 'Ubicación')?.val || '');
+      setAmount(e.rows.find(r => r.key.includes('Costo'))?.val || '');
+    }
     closeAlert();
-    showToast('📋 Solicitud anterior copiada al formulario');
-  }, [closeAlert, showToast]);
+    showToast('📋 Datos copiados al formulario');
+  }, [matchedItem, closeAlert, showToast]);
+
+  const findMatches = useCallback((text) => {
+    const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    if (!words.length) return null;
+
+    const matches = [];
+
+    for (const entry of ALL_ENTRIES) {
+      const kwMatch = entry.keywords.some(kw =>
+        words.some(w => kw.includes(w) || w.includes(kw))
+      );
+      const textMatch = words.some(w =>
+        entry.title.toLowerCase().includes(w) ||
+        entry.subtitle.toLowerCase().includes(w)
+      );
+      if (kwMatch || textMatch) {
+        matches.push({ source: 'knowledge', entry, matchedWords: words });
+      }
+    }
+
+    for (const post of feedPosts) {
+      const bodyMatch = words.some(w => (post.body || '').toLowerCase().includes(w));
+      const tagMatch = (post.tags || []).some(t =>
+        words.some(w => t.toLowerCase().includes(w))
+      );
+      if (bodyMatch || tagMatch) {
+        matches.push({ source: 'feed', entry: post, matchedWords: words });
+      }
+    }
+
+    if (!matches.length) return null;
+
+    const best = matches[0];
+    return {
+      ...best,
+      totalMatches: matches.length,
+      title: best.source === 'knowledge' ? best.entry.title : best.entry.body.slice(0, 60) + '...',
+      contact: best.source === 'knowledge' ? best.entry.contact : null,
+      department: best.source === 'knowledge' ? best.entry.dept : best.entry.department,
+      rows: best.source === 'knowledge'
+        ? best.entry.rows
+        : [
+            { key: 'Detalle', val: best.entry.body },
+            ...(best.entry.tags || []).map(t => ({ key: 'Etiqueta', val: t })),
+          ],
+    };
+  }, []);
 
   const openPicker = useCallback(() => {
     setShowDeptPicker(true);
@@ -173,31 +225,26 @@ export default function FormScreen({ route, navigation }) {
     }
   }, [route?.params?.openPicker, navigation]);
 
-  const checkDuplicate = useCallback((val) => {
-    if (alertTimeout.current) clearTimeout(alertTimeout.current);
-    const lower = val.toLowerCase();
-    if (lower.includes('aire') || lower.includes('acond')) {
-      alertTimeout.current = setTimeout(() => {
-        setShowAlert(true);
-        Animated.spring(slideAnim, {
-          toValue: 1, useNativeDriver: true, damping: 20, stiffness: 90,
-        }).start();
-      }, 1200);
-    }
-  }, [slideAnim]);
-
   const closeAlert = useCallback(() => {
     Animated.timing(slideAnim, {
       toValue: 0, duration: 200, useNativeDriver: true,
-    }).start(() => setShowAlert(false));
+    }).start(() => { setShowAlert(false); setMatchedItem(null); });
   }, [slideAnim]);
 
-  const sendAnyway = useCallback(() => {
+  const goToMatch = useCallback(() => {
+    if (!matchedItem) return;
     closeAlert();
-    navigation.navigate('Home');
-  }, [closeAlert, navigation]);
+    if (matchedItem.source === 'knowledge') {
+      navigation.navigate('Knowledge');
+    } else {
+      navigation.navigate('Feed', { department: matchedItem.department, filter: 'Completado' });
+    }
+  }, [matchedItem, closeAlert, navigation]);
 
   const handleSubmit = useCallback(() => {
+    const words = [title, description].filter(Boolean).join(' ');
+    const result = findMatches(words);
+
     if (showInFeed && department) {
       const initials = department.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
       const colors = ['#e74c3c', '#5b4adb', '#27ae60', '#f39c12', '#1abc9c', '#9b59b6', '#e67e22'];
@@ -224,20 +271,32 @@ export default function FormScreen({ route, navigation }) {
         comments: 0,
       });
     }
-    setShowAlert(true);
-    Animated.spring(slideAnim, {
-      toValue: 1, useNativeDriver: true, damping: 20, stiffness: 90,
-    }).start();
-  }, [slideAnim, showInFeed, department, title]);
+
+    if (result) {
+      setMatchedItem(result);
+      setShowAlert(true);
+      Animated.spring(slideAnim, {
+        toValue: 1, useNativeDriver: true, damping: 20, stiffness: 90,
+      }).start();
+      return true;
+    } else {
+      draftRef.current = null;
+      showToast('✅ Solicitud enviada');
+      navigation.navigate('Feed', { department, filter: 'Nuevo' });
+      return false;
+    }
+  }, [slideAnim, showInFeed, department, title, description, location, date, amount, priority, navigation, findMatches, showToast]);
 
   useEffect(() => {
     if (route?.params?.autoSubmit && department) {
-      handleSubmit();
+      const showedModal = handleSubmit();
       navigation.setParams({ autoSubmit: undefined });
-      setTimeout(() => {
-        closeAlert();
-        navigation.navigate('Feed', { department, filter: 'Nuevo' });
-      }, 800);
+      if (showedModal) {
+        setTimeout(() => {
+          closeAlert();
+          navigation.navigate('Feed', { department, filter: 'Nuevo' });
+        }, 800);
+      }
     }
   }, [route?.params?.autoSubmit, department]);
 
@@ -286,7 +345,7 @@ export default function FormScreen({ route, navigation }) {
                 placeholder={`Ej: ${examples[department] || 'Describir solicitud...'}`}
                 placeholderTextColor="#c7c7cc"
                 value={title}
-                onChangeText={(val) => { setTitle(val); checkDuplicate(val); }}
+                onChangeText={setTitle}
               />
             </View>
             <View style={styles.formRow}>
@@ -507,59 +566,56 @@ export default function FormScreen({ route, navigation }) {
                   <Text style={styles.alertClose}>✕</Text>
                 </TouchableOpacity>
               </View>
+              {matchedItem && (
+              <>
               <View style={styles.alertWarning}>
                 <Ionicons name="alert-triangle-outline" size={20} color={COLORS.medium} style={{ marginTop: 1 }} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.warningTitle}>Ya existe una compra similar</Text>
+                  <Text style={styles.warningTitle}>Se encontró información relacionada</Text>
                   <Text style={styles.warningSub}>
-                    Se detectaron 2 registros relacionados con "aire acondicionado" en los últimos 6 meses
+                    {matchedItem.totalMatches} registro{matchedItem.totalMatches !== 1 ? 's' : ''} relacionado{matchedItem.totalMatches !== 1 ? 's' : ''} con tu solicitud
                   </Text>
                 </View>
               </View>
               <View style={styles.similarCard}>
-                <Text style={styles.similarTitle}>Aire acondicionado — San Miguelito</Text>
-                {[
-                  { icon: 'calendar-outline', text: 'Comprado hace ', strong: '2 meses (Abr 2026)' },
-                  { icon: 'storefront-outline', text: 'Proveedor: ', strong: 'Distribuidora Techno S.A.' },
-                  { icon: 'person-outline', text: 'Responsable: ', strong: 'María López' },
-                  { icon: 'cash-outline', text: 'Costo: ', strong: '$4,200 · 3 unidades' },
-                  { icon: 'location-outline', text: 'Ubicación: ', strong: 'Oficina San Miguelito' },
-                ].map((item, i) => (
+                <Text style={styles.similarTitle}>{matchedItem.title}</Text>
+                {matchedItem.rows.slice(0, 6).map((row, i) => (
                   <View key={i} style={styles.similarRow}>
-                    <Ionicons name={item.icon} size={14} color={COLORS.textSecondary} />
+                    <Ionicons name="document-text-outline" size={14} color={COLORS.textSecondary} />
                     <Text style={styles.similarText}>
-                      {item.text}<Text style={styles.similarStrong}>{item.strong}</Text>
+                      {row.key}: <Text style={styles.similarStrong}>{row.val}</Text>
                     </Text>
                   </View>
                 ))}
               </View>
               <View style={styles.alertActions}>
-                <TouchableOpacity style={styles.alertBtnPrimary} onPress={() => {
-                  closeAlert();
-                  navigation.navigate('Feed', { department: 'Compras', filter: 'Completado' });
-                }}>
+                <TouchableOpacity style={styles.alertBtnPrimary} onPress={goToMatch}>
                   <Ionicons name="eye-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
                   <Text style={styles.alertBtnPrimaryText}>Ver detalles completos</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.alertBtnSecondary} onPress={copyPreviousRequest}>
+                <TouchableOpacity style={styles.alertBtnSecondary} onPress={copyFromMatch}>
                   <Ionicons name="copy-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
-                  <Text style={styles.alertBtnSecondaryText}>Copiar solicitud anterior</Text>
+                  <Text style={styles.alertBtnSecondaryText}>Copiar datos al formulario</Text>
                 </TouchableOpacity>
+                {matchedItem.contact && (
                 <TouchableOpacity style={styles.alertBtnSecondary} onPress={() => {
                   closeAlert();
-                  const url = 'tel:+50760001234';
+                  const url = `tel:${matchedItem.contact.phone.replace(/\s/g, '')}`;
                   Linking.canOpenURL(url).then(ok => {
                     if (ok) Linking.openURL(url);
-                    else showToast('📞 María López: +507 6000-1234');
+                    else showToast(`📞 ${matchedItem.contact.name}: ${matchedItem.contact.phone}`);
                   });
                 }}>
                   <Ionicons name="chatbubble-ellipses-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
-                  <Text style={styles.alertBtnSecondaryText}>Contactar a María López</Text>
+                  <Text style={styles.alertBtnSecondaryText}>Contactar a {matchedItem.contact.name}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.alertBtnGhost} onPress={sendAnyway}>
+                )}
+                <TouchableOpacity style={styles.alertBtnGhost} onPress={() => { closeAlert(); draftRef.current = null; showToast('✅ Solicitud enviada'); navigation.navigate('Feed', { department, filter: 'Nuevo' }); }}>
                   <Text style={styles.alertBtnGhostText}>Enviar de todas formas</Text>
                 </TouchableOpacity>
               </View>
+              </>
+              )}
             </TouchableOpacity>
           </Animated.View>
         </TouchableOpacity>
