@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { COLORS } from '../constants/theme';
 import { feedPosts } from '../data/feed';
 import { useToast } from '../context/ToastContext';
@@ -21,19 +21,31 @@ const statusConfig = {
   Pendiente: { icon: 'ellipse', color: '#ff9500', bg: '#fff8ec' },
 };
 
-export default function FeedScreen() {
+export default function FeedScreen({ navigation }) {
   const [posts, setPosts] = useState([...feedPosts]);
   const [filter, setFilter] = useState('Todos');
+  const [deptFilter, setDeptFilter] = useState(null);
   const [liked, setLiked] = useState({});
   const { showToast } = useToast();
+  const route = useRoute();
 
   useFocusEffect(
     useCallback(() => {
       setPosts([...feedPosts]);
+      const { department, filter: routeFilter } = route.params || {};
+      if (department) {
+        setDeptFilter(department);
+        setFilter(routeFilter || 'Proceso');
+        navigation.setParams({ department: undefined, filter: undefined });
+      }
     }, [])
   );
 
-  const filtered = filter === 'Todos' ? posts : posts.filter(p => p.tag === filter);
+  const filtered = posts.filter(p => {
+    const matchTag = filter === 'Todos' ? true : p.tag === filter;
+    const matchDept = deptFilter ? p.department === deptFilter : true;
+    return matchTag && matchDept;
+  });
 
   return (
     <View style={styles.container}>
@@ -42,6 +54,15 @@ export default function FeedScreen() {
         <Text style={styles.headerSub}>Feed empresarial en tiempo real</Text>
       </View>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        {deptFilter && (
+          <View style={styles.deptFilterBar}>
+            <Ionicons name="filter" size={13} color={COLORS.primary} />
+            <Text style={styles.deptFilterText}>{deptFilter}</Text>
+            <TouchableOpacity onPress={() => setDeptFilter(null)}>
+              <Ionicons name="close-circle" size={16} color="#8e8e93" />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.filters}>
           {FILTERS.map((f) => (
             <TouchableOpacity
@@ -120,6 +141,11 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 28, fontWeight: '700', color: COLORS.text, letterSpacing: -0.5 },
   headerSub: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
   scroll: { flex: 1 },
+  deptFilterBar: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 16, paddingTop: 8, 
+  },
+  deptFilterText: { fontSize: 13, fontWeight: '600', color: COLORS.primary, marginRight: 4 },
   filters: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4 },
   filterPill: {
     paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,

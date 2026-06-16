@@ -108,7 +108,14 @@ export default function HomeScreen({ navigation }) {
               key={dept.id}
               style={styles.deptCard}
               activeOpacity={0.7}
-              onPress={() => navigation.navigate('Form', { department: dept.name })}
+              onPress={() => {
+                const count = urgentCounts[dept.name] || 0;
+                if (count > 0) {
+                  navigation.navigate('Feed', { department: dept.name, filter: 'Proceso' });
+                } else {
+                  navigation.navigate('Form', { department: dept.name });
+                }
+              }}
             >
               {urgentCounts[dept.name] > 0 && (
                 <View style={styles.urgentBadge}>
