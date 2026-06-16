@@ -44,48 +44,53 @@ export default function FormScreen({ route, navigation }) {
   const [showDeptPicker, setShowDeptPicker] = useState(false);
   const [title, setTitle] = useState('');
 
+  useEffect(() => {
+    const p = route?.params || {};
+    const dept = p.department;
+    if (dept) {
+      setDepartment(dept);
+      setTitle(p.templateTitle || '');
+      setDescription(p.templateDescription || '');
+      setLocation(p.templateLocation || '');
+      setDate(p.templateDate || '');
+      setPriority('media');
+      setShowInFeed(true);
+      setShowDeptPicker(false);
+      navigation.setParams({
+        department: undefined,
+        templateTitle: undefined,
+        templateDescription: undefined,
+        templateLocation: undefined,
+        templateDate: undefined,
+      });
+    }
+  }, [route?.params?.department]);
+
   useFocusEffect(
     useCallback(() => {
       setShowLocationPicker(false);
-
       const p = route?.params || {};
-      const dept = p.department;
-
-      if (dept) {
-        setDepartment(dept);
-        setTitle(p.templateTitle || '');
-        setDescription(p.templateDescription || '');
-        setLocation(p.templateLocation || '');
-        setDate(p.templateDate || '');
-        setPriority('media');
-        setShowInFeed(true);
-        setShowDeptPicker(false);
-        navigation.setParams({
-          department: undefined,
-          templateTitle: undefined,
-          templateDescription: undefined,
-          templateLocation: undefined,
-          templateDate: undefined,
-        });
-      } else if (draftRef.current) {
+      if (!p.department) {
         const draft = draftRef.current;
-        setDepartment(draft.department);
-        setTitle(draft.title);
-        setDescription(draft.description);
-        setLocation(draft.location);
-        setDate(draft.date);
-        setPriority(draft.priority);
-        setShowInFeed(draft.showInFeed);
-      } else {
-        setDepartment(null);
-        setTitle('');
-        setDescription('');
-        setLocation('');
-        setDate('');
-        setPriority('media');
-        setShowInFeed(true);
+        if (draft) {
+          setDepartment(draft.department);
+          setTitle(draft.title);
+          setDescription(draft.description);
+          setLocation(draft.location);
+          setDate(draft.date);
+          setPriority(draft.priority);
+          setShowInFeed(draft.showInFeed);
+        } else {
+          setDepartment(null);
+          setTitle('');
+          setDescription('');
+          setLocation('');
+          setDate('');
+          setPriority('media');
+          setShowInFeed(true);
+        }
       }
-    }, [route, navigation])
+    }, [route?.params?.department])
   );
 
   const examples = {
@@ -125,6 +130,38 @@ export default function FormScreen({ route, navigation }) {
   const pickerSlideAnim = useRef(new Animated.Value(0)).current;
   const { showToast } = useToast();
   const draftRef = useRef(null);
+  const focusCallbackRef = useRef(() => {});
+
+  useFocusEffect(
+    useCallback(() => {
+      focusCallbackRef.current();
+    }, [])
+  );
+
+  focusCallbackRef.current = () => {
+    setShowLocationPicker(false);
+    const p = route?.params || {};
+    if (!p.department) {
+      const draft = draftRef.current;
+      if (draft) {
+        setDepartment(draft.department);
+        setTitle(draft.title);
+        setDescription(draft.description);
+        setLocation(draft.location);
+        setDate(draft.date);
+        setPriority(draft.priority);
+        setShowInFeed(draft.showInFeed);
+      } else {
+        setDepartment(null);
+        setTitle('');
+        setDescription('');
+        setLocation('');
+        setDate('');
+        setPriority('media');
+        setShowInFeed(true);
+      }
+    }
+  };
 
   const saveDraft = useCallback(() => {
     draftRef.current = {
