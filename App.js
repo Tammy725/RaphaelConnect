@@ -68,7 +68,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
               color={isActive ? COLORS.primary : '#8e8e93'}
             />
             <Text style={[styles.tabLabel, isActive && styles.activeLabel]}>
-              {name === 'Profile' ? 'Perfil' : name === 'Knowledge' ? 'Conocimiento' : name === 'Feed' ? 'Actividad' : name}
+              {name === 'Profile' ? 'Perfil' : name === 'Knowledge' ? 'Contactos' : name === 'Feed' ? 'Actividad' : name}
             </Text>
           </TouchableOpacity>
         );

@@ -352,10 +352,17 @@ export default function FormScreen({ route, navigation }) {
 
         {department ? (
         <>
-        <View style={styles.aiBanner}>
-          <Ionicons name="hardware-chip-outline" size={16} color={COLORS.primary} />
-          <Text style={styles.aiBannerText}>IA verificará solicitudes duplicadas antes de enviar</Text>
-        </View>
+        {(() => {
+          const entry = ALL_ENTRIES.find(e => e.dept === department);
+          const contact = entry?.contact;
+          return contact ? (
+            <View style={styles.contactBanner}>
+              <Text style={styles.contactBannerText}>
+                {contact.name} - {contact.phone}
+              </Text>
+            </View>
+          ) : null;
+        })()}
 
         <View style={styles.formSection}>
           <View style={styles.formCard}>
@@ -651,12 +658,11 @@ const styles = StyleSheet.create({
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 20 },
   emptyStateText: { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center', marginTop: 12, lineHeight: 20 },
   deptSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
-  aiBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginHorizontal: 16, marginTop: 12, padding: 10, borderRadius: 12,
-    backgroundColor: '#f0eeff', borderWidth: 1, borderColor: '#d4ceff',
+  contactBanner: {
+    marginHorizontal: 16, marginTop: 12, padding: 14, borderRadius: 14,
+    backgroundColor: '#f8f8fa', borderWidth: 0.5, borderColor: '#e5e5ea',
   },
-  aiBannerText: { fontSize: 12, color: COLORS.primary, fontWeight: '500', flex: 1 },
+  contactBannerText: { fontSize: 16, fontWeight: '600', color: COLORS.text, textAlign: 'center', lineHeight: 22 },
   formSection: { paddingHorizontal: 16, paddingTop: 12 },
   formCard: { backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden', borderWidth: 0.5, borderColor: COLORS.border },
   formRow: { padding: 13, paddingHorizontal: 16, borderBottomWidth: 0.5, borderBottomColor: COLORS.border },

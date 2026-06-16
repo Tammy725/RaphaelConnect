@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   SafeAreaView,
   TouchableOpacity,
   Modal,
@@ -13,7 +12,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../constants/theme';
-import { useToast } from '../context/ToastContext';
 
 export const ALL_ENTRIES = [
   {
@@ -99,169 +97,176 @@ export const ALL_ENTRIES = [
     ],
     tip: 'Los nuevos colaboradores requieren acceso a sistemas. Coordinar con Tecnología.',
   },
+  {
+    keywords: ['finanzas', 'presupuesto', 'pago', 'factura', 'proveedor'],
+    icon: '💰',
+    title: 'Finanzas',
+    subtitle: 'Departamento Financiero',
+    dept: 'Finanzas',
+    contact: { name: 'Sofia Martínez', phone: '+507 6000-1111' },
+    rows: [
+      { key: 'Responsable', val: 'Sofia Martínez' },
+      { key: 'Correo', val: 'smartinez@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['contabilidad', 'balance', 'impuesto', 'estado financiero'],
+    icon: '📊',
+    title: 'Contabilidad',
+    subtitle: 'Departamento Contable',
+    dept: 'Contabilidad',
+    contact: { name: 'Jorge Castillo', phone: '+507 6000-2222' },
+    rows: [
+      { key: 'Responsable', val: 'Jorge Castillo' },
+      { key: 'Correo', val: 'jcastillo@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['ventas', 'cliente', 'facturacion', 'pedido', 'comercial'],
+    icon: '📈',
+    title: 'Ventas',
+    subtitle: 'Departamento Comercial',
+    dept: 'Ventas',
+    contact: { name: 'Carolina Jiménez', phone: '+507 6000-3333' },
+    rows: [
+      { key: 'Responsable', val: 'Carolina Jiménez' },
+      { key: 'Correo', val: 'cjimenez@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['logistica', 'envio', 'transporte', 'inventario', 'bodega'],
+    icon: '🚚',
+    title: 'Logística',
+    subtitle: 'Departamento de Logística',
+    dept: 'Logística',
+    contact: { name: 'Pedro Álvarez', phone: '+507 6000-4444' },
+    rows: [
+      { key: 'Responsable', val: 'Pedro Álvarez' },
+      { key: 'Correo', val: 'palvarez@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['atencion', 'cliente', 'soporte', 'queja', 'reclamo', 'servicio'],
+    icon: '🎧',
+    title: 'Atención al Cliente',
+    subtitle: 'Departamento de Atención',
+    dept: 'Atención al Cliente',
+    contact: { name: 'Luisa Fernández', phone: '+507 6000-5555' },
+    rows: [
+      { key: 'Responsable', val: 'Luisa Fernández' },
+      { key: 'Correo', val: 'lfernandez@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['legal', 'abogado', 'contrato', 'regulacion', 'normativa'],
+    icon: '⚖️',
+    title: 'Legal',
+    subtitle: 'Departamento Legal',
+    dept: 'Legal',
+    contact: { name: 'Andrés Vega', phone: '+507 6000-6666' },
+    rows: [
+      { key: 'Responsable', val: 'Andrés Vega' },
+      { key: 'Correo', val: 'avega@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['administracion', 'gerencia', 'direccion', 'gestion'],
+    icon: '🏢',
+    title: 'Administración',
+    subtitle: 'Departamento Administrativo',
+    dept: 'Administración',
+    contact: { name: 'Mónica Ríos', phone: '+507 6000-7777' },
+    rows: [
+      { key: 'Responsable', val: 'Mónica Ríos' },
+      { key: 'Correo', val: 'mrios@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['auditoria', 'control', 'interno', 'cumplimiento', 'auditor'],
+    icon: '🔍',
+    title: 'Auditoría',
+    subtitle: 'Departamento de Auditoría',
+    dept: 'Auditoría',
+    contact: { name: 'Fernando Paredes', phone: '+507 6000-8888' },
+    rows: [
+      { key: 'Responsable', val: 'Fernando Paredes' },
+      { key: 'Correo', val: 'fparedes@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['proyectos', 'proyecto', 'obra', 'ejecucion', 'planificacion'],
+    icon: '📋',
+    title: 'Proyectos',
+    subtitle: 'Departamento de Proyectos',
+    dept: 'Proyectos',
+    contact: { name: 'Diana Morales', phone: '+507 6000-9999' },
+    rows: [
+      { key: 'Responsable', val: 'Diana Morales' },
+      { key: 'Correo', val: 'dmorales@raphaelconnect.com' },
+    ],
+    tip: null,
+  },
 ];
 
-function getContact(item) {
-  return item.contact || null;
-}
-
 export default function KnowledgeScreen() {
-  const [query, setQuery] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalEntry, setModalEntry] = useState(null);
-  const { showToast } = useToast();
   const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
 
-  const lower = query.toLowerCase().trim();
-  const results = !lower
-    ? ALL_ENTRIES
-    : ALL_ENTRIES.filter((item) => {
-        const kw = item.keywords.some(k => k.startsWith(lower) || k.includes(lower));
-        const text = `${item.title} ${item.subtitle}`.toLowerCase().includes(lower);
-        return kw || text;
-      });
-  const firstTip = results.find(r => r.tip);
+  function openCall(contact) {
+    const url = `tel:${contact.phone}`;
+    Linking.canOpenURL(url).then(ok => {
+      if (ok) Linking.openURL(url);
+    });
+  }
 
-  const LOCATIONS = [
-    'El Fuerte, San Miguelito', 'El Fuerte, Westland', 'El Fuerte, Villa Zaita',
-    'El Fuerte, 24 de Diciembre', 'El Fuerte, Federal Mall', 'El Fuerte, Burunga',
-    'La Onda, Los Pueblos', 'La Onda, Villa Lucre', 'La Onda, El Dorado',
-    'La Onda, Gran Estación', 'La Onda, Calidonia', 'La Onda, Los Andes',
-    'Torre BICSA', 'Century, Tumba Muerto',
-  ];
-
-  function buildTemplate(item) {
-    const locationRow = item.rows.find(r => r.key === 'Ubicación' || r.key === 'Área');
-    const rawLoc = locationRow ? locationRow.val : '';
-    const matched = LOCATIONS.find(l => l.toLowerCase().includes(rawLoc.toLowerCase()));
-    const amountRow = item.rows.find(r => r.key === 'Costo total' || r.key === 'Costo' || r.key === 'Presupuesto');
-    const dateRow = item.rows.find(r => r.key === 'Inicio');
-    return {
-      department: item.dept || '',
-      templateTitle: item.title,
-      templateDescription: item.rows.map(r => `${r.key}: ${r.val}`).join('. '),
-      templateLocation: matched || rawLoc,
-      templateAmount: amountRow ? amountRow.val : '',
-      templateDate: dateRow ? dateRow.val : '',
-    };
+  function openWhatsApp(contact) {
+    const phone = contact.phone.replace(/[^0-9]/g, '');
+    const url = `https://wa.me/${phone}`;
+    Linking.canOpenURL(url).then(ok => {
+      if (ok) Linking.openURL(url);
+    });
   }
 
   return (
     <View style={styles.root}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Conocimiento</Text>
-        <Text style={styles.headerSub}>Base de datos empresarial</Text>
+        <Text style={styles.headerTitle}>Contactos</Text>
+        <Text style={styles.headerSub}>Directorio empresarial</Text>
       </View>
       <SafeAreaView style={styles.container}>
-        <View style={styles.searchWrap}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={16} color={COLORS.textSecondary} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Buscar: aire acondicionado, proveedor..."
-              placeholderTextColor={COLORS.textSecondary}
-              value={query}
-              onChangeText={setQuery}
-            />
-          </View>
-        </View>
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-          {results.length > 0 ? (
-            <>
-              <Text style={styles.sectionTitle}>
-                {query ? `Resultados para "${query}"` : 'Todos los registros'}
-              </Text>
-              {results.map((item, idx) => (
-                <View key={idx}>
-                  <View style={styles.resultCard}>
-                    <View style={styles.resultHeader}>
-                      <Text style={styles.resultIcon}>{item.icon}</Text>
-                      <View>
-                        <Text style={styles.resultTitle}>{item.title}</Text>
-                        <Text style={styles.resultSub}>{item.subtitle}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.resultBody}>
-                      {item.rows.map((row, i) => (
-                        <View key={i} style={styles.knowRow}>
-                          <Text style={styles.knowKey}>{row.key}</Text>
-                          <Text style={[styles.knowVal, row.valColor && { color: row.valColor }]}>
-                            {row.val}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                </View>
-              ))}
-              {firstTip && (
-                <View style={styles.suggestionCard}>
-                  <View style={styles.suggestionRow}>
-                    <Ionicons name="bulb-outline" size={14} color={COLORS.primary} style={{ marginRight: 4 }} />
-                    <Text style={styles.suggestionTitle}>Sugerencia</Text>
-                  </View>
-                  <Text style={styles.suggestionText}>{firstTip.tip}</Text>
-                  <View style={styles.suggestionActions}>
-                    <TouchableOpacity
-                      style={styles.actionBtn}
-                      onPress={() => {
-                        setModalEntry(firstTip);
-                        setModalVisible(true);
-                      }}
-                    >
-                      <Ionicons name="eye-outline" size={14} color={COLORS.primary} />
-                      <Text style={styles.actionLabel}>Ver detalles completos</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.actionBtn}
-                      onPress={() => {
-                        const tpl = buildTemplate(firstTip);
-                        navigation.navigate('Form', tpl);
-                        showToast('📋 Datos copiados al formulario');
-                      }}
-                    >
-                      <Ionicons name="copy-outline" size={14} color={COLORS.primary} />
-                      <Text style={styles.actionLabel}>Copiar solicitud anterior</Text>
-                    </TouchableOpacity>
-                    {firstTip.contact && (
-                      <TouchableOpacity
-                        style={styles.actionBtn}
-                        onPress={() => {
-                          const c = firstTip.contact;
-                          const url = `tel:${c.phone}`;
-                          Linking.canOpenURL(url).then(ok => {
-                            if (ok) Linking.openURL(url);
-                            else showToast(`📞 ${c.name}: ${c.phone}`);
-                          });
-                        }}
-                      >
-                        <Ionicons name="person-outline" size={14} color={COLORS.primary} />
-                        <Text style={styles.actionLabel}>Contactar a {firstTip.contact.name}</Text>
-                      </TouchableOpacity>
-                    )}
-                    <TouchableOpacity
-                      style={[styles.actionBtn, styles.actionBtnPrimary]}
-                      onPress={() => {
-                        const tpl = buildTemplate(firstTip);
-                        navigation.navigate('Form', { ...tpl, autoSubmit: true });
-                      }}
-                    >
-                      <Ionicons name="send-outline" size={14} color="#fff" />
-                      <Text style={[styles.actionLabel, { color: '#fff' }]}>Enviar de todas formas</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-              <View style={{ height: 20 }} />
-            </>
-          ) : (
-            <View style={styles.empty}>
-              <Ionicons name="search-outline" size={40} color="#d1d1d6" />
-              <Text style={styles.emptyText}>
-                No se encontraron resultados para "{query}"
-              </Text>
-            </View>
-          )}
+          <Text style={styles.sectionTitle}>Todos los contactos</Text>
+          {ALL_ENTRIES.map((item, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.contactCard}
+              onPress={() => {
+                setSelectedContact(item.contact);
+                setModalVisible(true);
+              }}
+            >
+              <View style={styles.contactIconWrap}>
+                <Text style={styles.contactIcon}>{item.icon}</Text>
+              </View>
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactLine}>
+                  {item.dept} - {item.contact?.name || ''}
+                </Text>
+                <Text style={styles.contactPhone}>{item.contact?.phone || ''}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#c7c7cc" />
+            </TouchableOpacity>
+          ))}
+          <View style={{ height: 20 }} />
         </ScrollView>
       </SafeAreaView>
 
@@ -270,35 +275,33 @@ export default function KnowledgeScreen() {
           <View style={styles.modalSheet}>
             <TouchableOpacity activeOpacity={1}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Detalles completos</Text>
+                <Text style={styles.modalTitle}>Contactar</Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
                   <Text style={styles.modalClose}>✕</Text>
                 </TouchableOpacity>
               </View>
-              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-                {results.filter(r => r.dept === modalEntry?.dept || r.title === modalEntry?.title).map((item, idx) => (
-                  <View key={idx} style={styles.modalCard}>
-                    <View style={styles.modalCardHeader}>
-                      <Text style={styles.modalCardIcon}>{item.icon}</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.modalCardTitle}>{item.title}</Text>
-                        <Text style={styles.modalCardSub}>{item.subtitle}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.modalCardBody}>
-                      {item.rows.map((row, i) => (
-                        <View key={i} style={styles.knowRow}>
-                          <Text style={styles.knowKey}>{row.key}</Text>
-                          <Text style={[styles.knowVal, row.valColor && { color: row.valColor }]}>
-                            {row.val}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                ))}
-                <View style={{ height: 30 }} />
-              </ScrollView>
+              {selectedContact && (
+                <View style={styles.modalBody}>
+                  <Text style={styles.modalName}>{selectedContact.name}</Text>
+                  <Text style={styles.modalPhone}>{selectedContact.phone}</Text>
+
+                  <TouchableOpacity
+                    style={styles.modalBtn}
+                    onPress={() => openCall(selectedContact)}
+                  >
+                    <Ionicons name="call-outline" size={20} color="#34c759" />
+                    <Text style={styles.modalBtnText}>Llamar a {selectedContact.name}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.modalBtn}
+                    onPress={() => openWhatsApp(selectedContact)}
+                  >
+                    <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+                    <Text style={styles.modalBtnText}>Contactar por WhatsApp</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -316,75 +319,44 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 28, fontWeight: '700', color: COLORS.text, letterSpacing: -0.5 },
   headerSub: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
-  searchWrap: { padding: 12, paddingHorizontal: 16 },
-  searchBar: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white,
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, gap: 8,
-  },
-  searchInput: { flex: 1, fontSize: 15, color: COLORS.text },
   scroll: { flex: 1 },
-  empty: { alignItems: 'center', paddingVertical: 40, paddingHorizontal: 20 },
-  emptyText: { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center', marginTop: 12, lineHeight: 20 },
   sectionTitle: {
     fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
-    textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 20, paddingBottom: 8,
+    textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8,
   },
-  resultCard: {
+  contactCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: COLORS.white, borderRadius: 16, marginHorizontal: 16,
-    marginBottom: 10, overflow: 'hidden', borderWidth: 0.5, borderColor: COLORS.border,
+    marginBottom: 10, padding: 14, borderWidth: 0.5, borderColor: COLORS.border,
   },
-  resultHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    padding: 14, paddingHorizontal: 16, borderBottomWidth: 0.5, borderBottomColor: COLORS.border,
+  contactIconWrap: {
+    width: 42, height: 42, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#f2f2f7',
   },
-  resultIcon: { fontSize: 22 },
-  resultTitle: { fontSize: 14, fontWeight: '600', color: COLORS.text },
-  resultSub: { fontSize: 11, color: COLORS.textSecondary },
-  resultBody: { paddingVertical: 12, paddingHorizontal: 16 },
-  knowRow: {
-    flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5,
-    borderBottomWidth: 0.5, borderBottomColor: 'rgba(0,0,0,0.04)',
-  },
-  knowKey: { fontSize: 12, color: COLORS.textSecondary },
-  knowVal: { fontSize: 12, color: COLORS.text, fontWeight: '500' },
-  suggestionCard: {
-    marginHorizontal: 16, marginTop: 4, padding: 14,
-    backgroundColor: 'rgba(91,74,219,0.06)', borderRadius: 12,
-    borderWidth: 1, borderColor: 'rgba(91,74,219,0.15)',
-  },
-  suggestionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
-  suggestionTitle: { fontSize: 12, fontWeight: '600', color: COLORS.primary },
-  suggestionText: { fontSize: 12, color: COLORS.textTertiary, lineHeight: 18 },
-  suggestionActions: { marginTop: 12, gap: 6 },
-  actionBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingVertical: 8, paddingHorizontal: 12,
-    backgroundColor: COLORS.white, borderRadius: 8,
-    borderWidth: 1, borderColor: 'rgba(91,74,219,0.15)',
-  },
-  actionBtnPrimary: {
-    backgroundColor: COLORS.primary, borderColor: COLORS.primary,
-  },
-  actionLabel: { fontSize: 13, fontWeight: '600', color: COLORS.primary },
+  contactIcon: { fontSize: 20 },
+  contactInfo: { flex: 1 },
+  contactLine: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  contactPhone: { fontSize: 12, color: COLORS.textTertiary, marginTop: 1 },
   modalOverlay: { flex: 1, backgroundColor: COLORS.overlay, justifyContent: 'flex-end' },
   modalSheet: {
     backgroundColor: COLORS.white, borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    maxHeight: '85%', paddingBottom: 40,
+    paddingBottom: 40,
   },
   modalHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12,
+    borderBottomWidth: 0.5, borderBottomColor: COLORS.border,
   },
   modalTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text },
   modalClose: { fontSize: 22, color: COLORS.textSecondary, lineHeight: 22 },
-  modalScroll: { paddingHorizontal: 16 },
-  modalCard: {
-    backgroundColor: '#f9f9fb', borderRadius: 14, padding: 14, marginBottom: 10,
-    borderWidth: 0.5, borderColor: COLORS.border,
+  modalBody: { padding: 20, gap: 16 },
+  modalName: { fontSize: 18, fontWeight: '700', color: COLORS.text, textAlign: 'center' },
+  modalPhone: { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center', marginTop: -8 },
+  modalBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    paddingVertical: 14, borderRadius: 12,
+    backgroundColor: '#f2f2f7',
   },
-  modalCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
-  modalCardIcon: { fontSize: 20 },
-  modalCardTitle: { fontSize: 14, fontWeight: '600', color: COLORS.text },
-  modalCardSub: { fontSize: 11, color: COLORS.textSecondary },
-  modalCardBody: {},
+  modalBtnText: { fontSize: 16, fontWeight: '600', color: COLORS.text },
 });
