@@ -38,13 +38,15 @@ export default function FormScreen({ route, navigation }) {
   const [title, setTitle] = useState('');
 
   useEffect(() => {
-    const dept = route?.params?.department;
+    const p = route?.params || {};
+    const dept = p.department;
     if (dept) {
       setDepartment(dept);
-      setTitle('');
-      setDescription('');
-      setLocation('');
-      setDate('');
+      setTitle(p.templateTitle || '');
+      setDescription(p.templateDescription || '');
+      setLocation(p.templateLocation || '');
+      setDate(p.templateDate || '');
+      setAmount(p.templateAmount || '');
       setPriority('media');
       setShowDeptPicker(false);
     }
@@ -69,7 +71,7 @@ export default function FormScreen({ route, navigation }) {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(route?.params?.templateAmount || '');
   const [priority, setPriority] = useState('media');
   const [showInFeed, setShowInFeed] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
@@ -153,6 +155,17 @@ export default function FormScreen({ route, navigation }) {
       toValue: 1, useNativeDriver: true, damping: 20, stiffness: 90,
     }).start();
   }, [slideAnim, showInFeed, department, title]);
+
+  useEffect(() => {
+    if (route?.params?.autoSubmit && department) {
+      handleSubmit();
+      navigation.setParams({ autoSubmit: undefined });
+      setTimeout(() => {
+        closeAlert();
+        navigation.navigate('Feed', { department, filter: 'Nuevo' });
+      }, 800);
+    }
+  }, [route?.params?.autoSubmit, department]);
 
   return (
     <View style={styles.container}>

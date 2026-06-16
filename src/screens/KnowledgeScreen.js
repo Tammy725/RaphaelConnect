@@ -7,6 +7,8 @@ import {
   TextInput,
   SafeAreaView,
   TouchableOpacity,
+  Modal,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +21,8 @@ const ALL_ENTRIES = [
     icon: '🛒',
     title: 'Compra: Aires Acondicionados Samsung',
     subtitle: 'Compras · Hace 2 meses',
+    dept: 'Compras',
+    contact: { name: 'María López', phone: '+507 6000-1234' },
     rows: [
       { key: 'Cantidad', val: '3 unidades (18,000 BTU)' },
       { key: 'Proveedor', val: 'Distribuidora Techno S.A.' },
@@ -35,6 +39,8 @@ const ALL_ENTRIES = [
     icon: '⚙️',
     title: 'Mantenimiento: Equipos HVAC',
     subtitle: 'Operaciones · Hace 5 meses',
+    dept: 'Operaciones',
+    contact: { name: 'Carlos Ramos', phone: '+507 6000-5678' },
     rows: [
       { key: 'Servicio', val: 'Limpieza y recarga de gas' },
       { key: 'Proveedor', val: 'CoolTech Panamá' },
@@ -48,6 +54,8 @@ const ALL_ENTRIES = [
     icon: '💻',
     title: 'Compra: Laptops Dell Latitude 5540',
     subtitle: 'Tecnología · Hace 5 horas',
+    dept: 'Tecnología',
+    contact: { name: 'Roberto Salas', phone: '+507 6000-9012' },
     rows: [
       { key: 'Cantidad', val: '15 unidades' },
       { key: 'Proveedor', val: 'Dell Panamá' },
@@ -64,6 +72,8 @@ const ALL_ENTRIES = [
     icon: '📢',
     title: 'Campaña Digital Q2 2026',
     subtitle: 'Marketing · Hace 2 días',
+    dept: 'Marketing',
+    contact: { name: 'Ana Torres', phone: '+507 6000-3456' },
     rows: [
       { key: 'Tipo', val: 'Redes sociales + display' },
       { key: 'Presupuesto', val: '$8,500.00' },
@@ -78,6 +88,8 @@ const ALL_ENTRIES = [
     icon: '👥',
     title: 'Contratación: Atención al Cliente',
     subtitle: 'RRHH · Ayer',
+    dept: 'Recursos Humanos',
+    contact: { name: 'Laura Méndez', phone: '+507 6000-7890' },
     rows: [
       { key: 'Nuevos colaboradores', val: '4 personas' },
       { key: 'Área', val: 'Atención al Cliente' },
@@ -89,18 +101,14 @@ const ALL_ENTRIES = [
   },
 ];
 
-function getDept(item) {
-  const parts = (item.subtitle || '').split('·');
-  return parts[0] ? parts[0].trim() : null;
-}
-
 function getContact(item) {
-  const row = item.rows.find(r => r.key === 'Responsable');
-  return row ? row.val : null;
+  return item.contact || null;
 }
 
 export default function KnowledgeScreen() {
   const [query, setQuery] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalEntry, setModalEntry] = useState(null);
   const { showToast } = useToast();
   const navigation = useNavigation();
 
@@ -113,6 +121,20 @@ export default function KnowledgeScreen() {
         return kw || text;
       });
   const firstTip = results.find(r => r.tip);
+
+  function buildTemplate(item) {
+    const locationRow = item.rows.find(r => r.key === 'Ubicación' || r.key === 'Área');
+    const amountRow = item.rows.find(r => r.key === 'Costo total' || r.key === 'Costo' || r.key === 'Presupuesto');
+    const dateRow = item.rows.find(r => r.key === 'Inicio');
+    return {
+      department: item.dept || '',
+      templateTitle: item.title,
+      templateDescription: item.rows.map(r => `${r.key}: ${r.val}`).join('. '),
+      templateLocation: locationRow ? locationRow.val : '',
+      templateAmount: amountRow ? amountRow.val : '',
+      templateDate: dateRow ? dateRow.val : '',
+    };
+  }
 
   return (
     <View style={styles.root}>
@@ -173,8 +195,8 @@ export default function KnowledgeScreen() {
                     <TouchableOpacity
                       style={styles.actionBtn}
                       onPress={() => {
-                        const dept = getDept(firstTip);
-                        if (dept) navigation.navigate('Feed', { department: dept, filter: 'Completado' });
+                        setModalEntry(firstTip);
+                        setModalVisible(true);
                       }}
                     >
                       <Ionicons name="eye-outline" size={14} color={COLORS.primary} />
@@ -183,31 +205,35 @@ export default function KnowledgeScreen() {
                     <TouchableOpacity
                       style={styles.actionBtn}
                       onPress={() => {
-                        const dept = getDept(firstTip);
-                        if (dept) navigation.navigate('Form', { department: dept, template: firstTip.title });
-                        showToast('📋 Solicitud copiada');
+                        const tpl = buildTemplate(firstTip);
+                        navigation.navigate('Form', tpl);
+                        showToast('📋 Datos copiados al formulario');
                       }}
                     >
                       <Ionicons name="copy-outline" size={14} color={COLORS.primary} />
                       <Text style={styles.actionLabel}>Copiar solicitud anterior</Text>
                     </TouchableOpacity>
-                    {getContact(firstTip) && (
+                    {firstTip.contact && (
                       <TouchableOpacity
                         style={styles.actionBtn}
                         onPress={() => {
-                          const name = getContact(firstTip);
-                          showToast(`👤 ${name} — datos de contacto mostrados`);
+                          const c = firstTip.contact;
+                          const url = `tel:${c.phone}`;
+                          Linking.canOpenURL(url).then(ok => {
+                            if (ok) Linking.openURL(url);
+                            else showToast(`📞 ${c.name}: ${c.phone}`);
+                          });
                         }}
                       >
                         <Ionicons name="person-outline" size={14} color={COLORS.primary} />
-                        <Text style={styles.actionLabel}>Contactar a {getContact(firstTip)}</Text>
+                        <Text style={styles.actionLabel}>Contactar a {firstTip.contact.name}</Text>
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity
                       style={[styles.actionBtn, styles.actionBtnPrimary]}
                       onPress={() => {
-                        const dept = getDept(firstTip);
-                        navigation.navigate('Form', { department: dept || '' });
+                        const tpl = buildTemplate(firstTip);
+                        navigation.navigate('Form', { ...tpl, autoSubmit: true });
                       }}
                     >
                       <Ionicons name="send-outline" size={14} color="#fff" />
@@ -228,6 +254,45 @@ export default function KnowledgeScreen() {
           )}
         </ScrollView>
       </SafeAreaView>
+
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
+          <View style={styles.modalSheet}>
+            <TouchableOpacity activeOpacity={1}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Detalles completos</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Text style={styles.modalClose}>✕</Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+                {results.filter(r => r.dept === modalEntry?.dept || r.title === modalEntry?.title).map((item, idx) => (
+                  <View key={idx} style={styles.modalCard}>
+                    <View style={styles.modalCardHeader}>
+                      <Text style={styles.modalCardIcon}>{item.icon}</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.modalCardTitle}>{item.title}</Text>
+                        <Text style={styles.modalCardSub}>{item.subtitle}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.modalCardBody}>
+                      {item.rows.map((row, i) => (
+                        <View key={i} style={styles.knowRow}>
+                          <Text style={styles.knowKey}>{row.key}</Text>
+                          <Text style={[styles.knowVal, row.valColor && { color: row.valColor }]}>
+                            {row.val}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                ))}
+                <View style={{ height: 30 }} />
+              </ScrollView>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -291,4 +356,25 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary, borderColor: COLORS.primary,
   },
   actionLabel: { fontSize: 13, fontWeight: '600', color: COLORS.primary },
+  modalOverlay: { flex: 1, backgroundColor: COLORS.overlay, justifyContent: 'flex-end' },
+  modalSheet: {
+    backgroundColor: COLORS.white, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    maxHeight: '85%', paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12,
+  },
+  modalTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text },
+  modalClose: { fontSize: 22, color: COLORS.textSecondary, lineHeight: 22 },
+  modalScroll: { paddingHorizontal: 16 },
+  modalCard: {
+    backgroundColor: '#f9f9fb', borderRadius: 14, padding: 14, marginBottom: 10,
+    borderWidth: 0.5, borderColor: COLORS.border,
+  },
+  modalCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  modalCardIcon: { fontSize: 20 },
+  modalCardTitle: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  modalCardSub: { fontSize: 11, color: COLORS.textSecondary },
+  modalCardBody: {},
 });
