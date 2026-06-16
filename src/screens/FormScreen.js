@@ -198,22 +198,22 @@ export default function FormScreen({ route, navigation }) {
             <Ionicons name="chevron-back-outline" size={18} color={COLORS.primary} />
             <Text style={styles.backText}>Inicio</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deptHeader} onPress={openPicker} activeOpacity={0.7}>
-            <View style={styles.deptRow}>
+          <View style={styles.deptRow}>
+            <TouchableOpacity style={styles.deptHeader} onPress={openPicker} activeOpacity={0.7}>
               <Text style={[styles.deptName, !department && styles.deptPlaceholder]}>
                 {department || 'Seleccionar departamento'}
               </Text>
               <Ionicons name="chevron-down" size={20} color={COLORS.text} />
-              <View style={{ flex: 1 }} />
-              <TouchableOpacity onPress={() => Alert.alert('Guardar solicitud', 'Se guardará todo lo que has escrito hasta ahora.', [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Guardar', onPress: handleSubmit },
-              ])} style={styles.saveBtn}>
-                <Ionicons name="save-outline" size={20} color={COLORS.text} />
-                <Text style={styles.saveLabel}>Guardar</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity onPress={() => Alert.alert('Guardar solicitud', 'Se guardará todo lo que has escrito hasta ahora.', [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Guardar', onPress: handleSubmit },
+            ])} style={styles.saveBtn}>
+              <Ionicons name="save-outline" size={20} color={COLORS.text} />
+              <Text style={styles.saveLabel}>Guardar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {department ? (
@@ -522,8 +522,7 @@ const styles = StyleSheet.create({
   saveLabel: { fontSize: 9, color: COLORS.text, marginTop: 1, fontWeight: '500' },
   backText: { fontSize: 15, color: COLORS.primary, fontWeight: '500' },
   deptHeader: {
-    paddingHorizontal: 20, paddingVertical: 8, paddingBottom: 14,
-    borderBottomWidth: 0.5, borderBottomColor: COLORS.borderLight,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
   },
   deptName: { fontSize: 22, fontWeight: '700', color: COLORS.text, letterSpacing: -0.5 },
   deptPlaceholder: { color: COLORS.textSecondary, fontWeight: '500' },
@@ -565,7 +564,7 @@ const styles = StyleSheet.create({
     borderRadius: 14, padding: 16,
   },
   submitText: { fontSize: 16, fontWeight: '600', color: COLORS.white },
-  deptRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  deptRow: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 20, paddingVertical: 8, paddingBottom: 14, borderBottomWidth: 0.5, borderBottomColor: COLORS.borderLight },
   pickerOverlay: { flex: 1, backgroundColor: COLORS.overlay, justifyContent: 'flex-end' },
   pickerSheet: {
     backgroundColor: COLORS.white, borderTopLeftRadius: 24, borderTopRightRadius: 24,
