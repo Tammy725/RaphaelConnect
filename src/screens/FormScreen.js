@@ -202,7 +202,7 @@ export default function FormScreen({ route, navigation }) {
               <Text style={[styles.deptName, !department && styles.deptPlaceholder]}>
                 {department || 'Seleccionar departamento'}
               </Text>
-              <Ionicons name="chevron-down" size={20} color={COLORS.textSecondary} />
+              <Ionicons name="chevron-down" size={20} color={COLORS.text} />
             </View>
           </TouchableOpacity>
         </View>
