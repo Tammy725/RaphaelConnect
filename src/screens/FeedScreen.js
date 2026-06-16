@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../constants/theme';
 import { feedPosts } from '../data/feed';
 import { useToast } from '../context/ToastContext';
@@ -29,16 +29,19 @@ export default function FeedScreen({ navigation }) {
   const { showToast } = useToast();
   const route = useRoute();
 
-  const prevDept = useRef(null);
-
   useFocusEffect(
     useCallback(() => {
       setPosts([...feedPosts]);
-      const { department, filter: routeFilter } = route.params || {};
+      const state = navigation.getState();
+      const feedRoute = state?.routes?.find(r => r.name === 'Feed');
+      const params = feedRoute?.params || {};
+      const { department, filter: routeFilter } = params;
       if (department) {
         setDeptFilter(department);
         setFilter(routeFilter || 'Proceso');
-        prevDept.current = department;
+      } else {
+        setDeptFilter(null);
+        setFilter('Todos');
       }
     }, [])
   );
