@@ -33,7 +33,13 @@ function CustomTabBar({ state, descriptors, navigation }) {
               key="Form"
               style={styles.centerBtnOuter}
               activeOpacity={0.8}
-              onPress={() => navigation.navigate('Form')}
+              onPress={() => {
+                if (state.index === 2) {
+                  navigation.navigate('Form', { openPicker: Date.now() });
+                } else {
+                  navigation.navigate('Form');
+                }
+              }}
             >
               <View style={styles.centerBtn}>
                 <Ionicons name="add" size={26} color={COLORS.white} />

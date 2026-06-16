@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Modal,
   Animated,
-  PanResponder,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
@@ -49,6 +48,13 @@ export default function FormScreen({ route, navigation }) {
     }
   }, [route?.params?.department]);
 
+  useEffect(() => {
+    if (route?.params?.openPicker) {
+      setShowDeptPicker(true);
+      navigation.setParams({ openPicker: undefined });
+    }
+  }, [route?.params?.openPicker, navigation]);
+
   const examples = {
     Compras: 'Comprar computadoras para las oficinas nuevas',
     Tecnología: 'Reparar mi computadora que no enciende',
@@ -72,32 +78,6 @@ export default function FormScreen({ route, navigation }) {
   const [showAlert, setShowAlert] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const alertTimeout = useRef(null);
-  const pickerTranslateY = useRef(new Animated.Value(0)).current;
-
-  const pickerPanResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (_, gs) => gs.dy > 5,
-      onPanResponderMove: (_, gs) => {
-        if (gs.dy > 0) pickerTranslateY.setValue(gs.dy);
-      },
-      onPanResponderRelease: (_, gs) => {
-        if (gs.dy > 0) {
-          Animated.timing(pickerTranslateY, {
-            toValue: 500, duration: 250, useNativeDriver: true,
-          }).start(() => {
-            setShowDeptPicker(false);
-            pickerTranslateY.setValue(0);
-          });
-        } else {
-          Animated.timing(pickerTranslateY, {
-            toValue: 0, duration: 150, useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
-
   const checkDuplicate = useCallback((val) => {
     if (alertTimeout.current) clearTimeout(alertTimeout.current);
     const lower = val.toLowerCase();
@@ -248,48 +228,44 @@ export default function FormScreen({ route, navigation }) {
         )}
       </ScrollView>
 
-      <Modal visible={showDeptPicker} transparent animationType="none" onShow={() => pickerTranslateY.setValue(0)}>
-        <View style={styles.pickerOverlay}>
-          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setShowDeptPicker(false)} />
-          <Animated.View
-            style={[styles.pickerSheet, { transform: [{ translateY: pickerTranslateY }] }]}
-            {...pickerPanResponder.panHandlers}
-          >
-            <View style={styles.pickerHandle} />
-            <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>Seleccionar departamento</Text>
-              {department && (
+      {showDeptPicker && (
+        <Modal visible={showDeptPicker} transparent animationType="none">
+          <View style={styles.pickerOverlay}>
+            <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setShowDeptPicker(false)} />
+            <View style={styles.pickerSheet}>
+              <View style={styles.pickerHeader}>
+                <Text style={styles.pickerTitle}>Seleccionar departamento</Text>
                 <TouchableOpacity onPress={() => setShowDeptPicker(false)}>
                   <Text style={styles.pickerClose}>✕</Text>
                 </TouchableOpacity>
-              )}
+              </View>
+              <View style={styles.pickerGrid}>
+                {departments.map((dept) => (
+                  <TouchableOpacity
+                    key={dept.id}
+                    style={[
+                      styles.pickerCard,
+                      department === dept.name && styles.pickerCardActive,
+                    ]}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setDepartment(dept.name);
+                      setShowDeptPicker(false);
+                    }}
+                  >
+                    <View style={[styles.pickerIcon, { backgroundColor: dept.bg }]}>
+                      <Ionicons name={iconMap[dept.icon] || 'folder-outline'} size={18} color={COLORS.primary} />
+                    </View>
+                    <Text style={styles.pickerName} numberOfLines={1}>
+                      {dept.short || dept.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-            <View style={styles.pickerGrid}>
-              {departments.map((dept) => (
-                <TouchableOpacity
-                  key={dept.id}
-                  style={[
-                    styles.pickerCard,
-                    department === dept.name && styles.pickerCardActive,
-                  ]}
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    setDepartment(dept.name);
-                    setShowDeptPicker(false);
-                  }}
-                >
-                  <View style={[styles.pickerIcon, { backgroundColor: dept.bg }]}>
-                    <Ionicons name={iconMap[dept.icon] || 'folder-outline'} size={18} color={COLORS.primary} />
-                  </View>
-                  <Text style={styles.pickerName} numberOfLines={1}>
-                    {dept.short || dept.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </Animated.View>
-        </View>
-      </Modal>
+          </View>
+        </Modal>
+      )}
 
       <Modal visible={showAlert} transparent animationType="none">
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={closeAlert}>
@@ -409,8 +385,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     paddingBottom: 40, maxHeight: '80%',
   },
-  pickerHandle: { width: 36, height: 4, backgroundColor: '#d1d1d6', borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 14 },
-  pickerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 14 },
+  pickerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 14 },
   pickerTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text },
   pickerClose: { fontSize: 22, color: COLORS.textSecondary, lineHeight: 22 },
   pickerGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, gap: 10 },
