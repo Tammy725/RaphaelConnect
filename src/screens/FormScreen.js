@@ -9,11 +9,13 @@ import {
   Modal,
   Animated,
   Switch,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { departments } from '../data/departments';
 import { feedPosts } from '../data/feed';
+import { useToast } from '../context/ToastContext';
 
 const iconMap = {
   cart: 'cart-outline',
@@ -78,6 +80,16 @@ export default function FormScreen({ route, navigation }) {
   const slideAnim = useRef(new Animated.Value(0)).current;
   const alertTimeout = useRef(null);
   const pickerSlideAnim = useRef(new Animated.Value(0)).current;
+  const { showToast } = useToast();
+
+  const copyPreviousRequest = useCallback(() => {
+    setTitle('Compra: Aires Acondicionados Samsung');
+    setDescription('3 unidades 18,000 BTU para oficinas San Miguelito. Proveedor: Distribuidora Techno S.A.');
+    setLocation('San Miguelito');
+    setAmount('$4,200.00');
+    closeAlert();
+    showToast('📋 Solicitud anterior copiada al formulario');
+  }, [closeAlert, showToast]);
 
   const openPicker = useCallback(() => {
     setShowDeptPicker(true);
@@ -400,15 +412,25 @@ export default function FormScreen({ route, navigation }) {
                 ))}
               </View>
               <View style={styles.alertActions}>
-                <TouchableOpacity style={styles.alertBtnPrimary} onPress={closeAlert}>
+                <TouchableOpacity style={styles.alertBtnPrimary} onPress={() => {
+                  closeAlert();
+                  navigation.navigate('Feed', { department: 'Compras', filter: 'Completado' });
+                }}>
                   <Ionicons name="eye-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
                   <Text style={styles.alertBtnPrimaryText}>Ver detalles completos</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.alertBtnSecondary} onPress={closeAlert}>
+                <TouchableOpacity style={styles.alertBtnSecondary} onPress={copyPreviousRequest}>
                   <Ionicons name="copy-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
                   <Text style={styles.alertBtnSecondaryText}>Copiar solicitud anterior</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.alertBtnSecondary} onPress={closeAlert}>
+                <TouchableOpacity style={styles.alertBtnSecondary} onPress={() => {
+                  closeAlert();
+                  const url = 'tel:+50760001234';
+                  Linking.canOpenURL(url).then(ok => {
+                    if (ok) Linking.openURL(url);
+                    else showToast('📞 María López: +507 6000-1234');
+                  });
+                }}>
                   <Ionicons name="chatbubble-ellipses-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
                   <Text style={styles.alertBtnSecondaryText}>Contactar a María López</Text>
                 </TouchableOpacity>
