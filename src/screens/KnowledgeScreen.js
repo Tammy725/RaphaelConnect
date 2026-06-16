@@ -122,15 +122,25 @@ export default function KnowledgeScreen() {
       });
   const firstTip = results.find(r => r.tip);
 
+  const LOCATIONS = [
+    'El Fuerte, San Miguelito', 'El Fuerte, Westland', 'El Fuerte, Villa Zaita',
+    'El Fuerte, 24 de Diciembre', 'El Fuerte, Federal Mall', 'El Fuerte, Burunga',
+    'La Onda, Los Pueblos', 'La Onda, Villa Lucre', 'La Onda, El Dorado',
+    'La Onda, Gran Estación', 'La Onda, Calidonia', 'La Onda, Los Andes',
+    'Torre BICSA', 'Century, Tumba Muerto',
+  ];
+
   function buildTemplate(item) {
     const locationRow = item.rows.find(r => r.key === 'Ubicación' || r.key === 'Área');
+    const rawLoc = locationRow ? locationRow.val : '';
+    const matched = LOCATIONS.find(l => l.toLowerCase().includes(rawLoc.toLowerCase()));
     const amountRow = item.rows.find(r => r.key === 'Costo total' || r.key === 'Costo' || r.key === 'Presupuesto');
     const dateRow = item.rows.find(r => r.key === 'Inicio');
     return {
       department: item.dept || '',
       templateTitle: item.title,
       templateDescription: item.rows.map(r => `${r.key}: ${r.val}`).join('. '),
-      templateLocation: locationRow ? locationRow.val : '',
+      templateLocation: matched || rawLoc,
       templateAmount: amountRow ? amountRow.val : '',
       templateDate: dateRow ? dateRow.val : '',
     };

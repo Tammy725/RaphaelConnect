@@ -70,12 +70,22 @@ export default function FormScreen({ route, navigation }) {
     Auditoría: 'Solicitar documentos de compras de marzo',
     Proyectos: 'Actualizar cronograma del proyecto',
   };
+
+  const LOCATIONS = [
+    'El Fuerte, San Miguelito', 'El Fuerte, Westland', 'El Fuerte, Villa Zaita',
+    'El Fuerte, 24 de Diciembre', 'El Fuerte, Federal Mall', 'El Fuerte, Burunga',
+    'La Onda, Los Pueblos', 'La Onda, Villa Lucre', 'La Onda, El Dorado',
+    'La Onda, Gran Estación', 'La Onda, Calidonia', 'La Onda, Los Andes',
+    'Torre BICSA', 'Century, Tumba Muerto',
+  ];
+
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
   const [amount, setAmount] = useState(route?.params?.templateAmount || '');
   const [priority, setPriority] = useState('media');
   const [showInFeed, setShowInFeed] = useState(true);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const alertTimeout = useRef(null);
@@ -230,14 +240,13 @@ export default function FormScreen({ route, navigation }) {
               />
             </View>
             <View style={styles.formRow}>
-              <Text style={styles.formLabel}>Ubicación</Text>
-              <TextInput
-                style={styles.formInput}
-                placeholder="Ej: Oficina San Miguelito"
-                placeholderTextColor="#c7c7cc"
-                value={location}
-                onChangeText={setLocation}
-              />
+              <Text style={styles.formLabel}>Sucursal</Text>
+              <TouchableOpacity style={styles.locPicker} onPress={() => setShowLocationPicker(true)}>
+                <Text style={[styles.locPickerText, !location && styles.locPlaceholder]}>
+                  {location || 'Seleccionar sucursal'}
+                </Text>
+                <Ionicons name="chevron-down" size={16} color={COLORS.textSecondary} />
+              </TouchableOpacity>
             </View>
             <View style={styles.formRow}>
               <Text style={styles.formLabel}>Fecha requerida</Text>
@@ -367,6 +376,29 @@ export default function FormScreen({ route, navigation }) {
         </TouchableOpacity>
       </Modal>
 
+      <Modal visible={showLocationPicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.pickerOverlay} activeOpacity={1} onPress={() => setShowLocationPicker(false)}>
+          <View style={styles.locSheet}>
+            <Text style={styles.locSheetTitle}>Seleccionar sucursal</Text>
+            <ScrollView style={styles.locScroll} showsVerticalScrollIndicator={false}>
+              {LOCATIONS.map((loc, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={[styles.locItem, location === loc && styles.locItemActive]}
+                  onPress={() => { setLocation(loc); setShowLocationPicker(false); }}
+                >
+                  <Ionicons
+                    name={location === loc ? 'radio-button-on' : 'radio-button-off'}
+                    size={18}
+                    color={location === loc ? COLORS.primary : '#c7c7cc'}
+                  />
+                  <Text style={[styles.locItemText, location === loc && styles.locItemTextActive]}>{loc}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
       <Modal visible={showAlert} transparent animationType="none">
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={closeAlert}>
           <Animated.View style={[styles.alertSheet, {
@@ -547,4 +579,26 @@ const styles = StyleSheet.create({
   alertBtnSecondaryText: { fontSize: 15, fontWeight: '600', color: COLORS.primary },
   alertBtnGhost: { alignItems: 'center', padding: 12 },
   alertBtnGhostText: { fontSize: 14, color: COLORS.textSecondary },
+  locPicker: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 6,
+  },
+  locPickerText: { fontSize: 15, color: COLORS.text },
+  locPlaceholder: { color: '#c7c7cc' },
+  locSheet: {
+    backgroundColor: COLORS.white, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    paddingBottom: 40, maxHeight: '70%',
+  },
+  locSheetTitle: {
+    fontSize: 17, fontWeight: '700', color: COLORS.text,
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12,
+  },
+  locScroll: { paddingHorizontal: 16 },
+  locItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: COLORS.border,
+  },
+  locItemActive: { backgroundColor: '#f0eeff', borderRadius: 8, paddingHorizontal: 8 },
+  locItemText: { fontSize: 15, color: COLORS.text },
+  locItemTextActive: { fontWeight: '600', color: COLORS.primary },
 });
