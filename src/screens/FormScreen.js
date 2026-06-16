@@ -198,11 +198,11 @@ export default function FormScreen({ route, navigation }) {
             <Text style={styles.backText}>Inicio</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.deptHeader} onPress={openPicker} activeOpacity={0.7}>
-            <Text style={[styles.deptName, !department && styles.deptPlaceholder]}>
-              {department || 'Seleccionar departamento'}
-            </Text>
             <View style={styles.deptRow}>
-              <Ionicons name="chevron-down" size={14} color={COLORS.textSecondary} />
+              <Text style={[styles.deptName, !department && styles.deptPlaceholder]}>
+                {department || 'Seleccionar departamento'}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color={COLORS.textSecondary} />
             </View>
           </TouchableOpacity>
         </View>
