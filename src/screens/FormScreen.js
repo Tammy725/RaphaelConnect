@@ -205,7 +205,7 @@ export default function FormScreen({ route, navigation }) {
               </Text>
               <Ionicons name="chevron-down" size={20} color={COLORS.text} />
               <View style={{ flex: 1 }} />
-              <TouchableOpacity onPress={() => Alert.alert('Guardar solicitud', 'Se guardará todo lo que has escrito hasta ahora. No se perderá.', [
+              <TouchableOpacity onPress={() => Alert.alert('Guardar solicitud', 'Se guardará todo lo que has escrito hasta ahora.', [
                 { text: 'Cancelar', style: 'cancel' },
                 { text: 'Guardar', onPress: handleSubmit },
               ])} style={styles.saveBtn}>
