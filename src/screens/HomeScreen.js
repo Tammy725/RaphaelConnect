@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
@@ -109,12 +110,12 @@ export default function HomeScreen({ navigation }) {
               style={styles.deptCard}
               activeOpacity={0.7}
               onPress={() => {
-                const count = urgentCounts[dept.name] || 0;
-                if (count > 0) {
-                  navigation.navigate('Feed', { department: dept.name, filter: 'Proceso' });
-                } else {
-                  navigation.navigate('Form', { department: dept.name });
-                }
+                const name = dept.short || dept.name;
+                Alert.alert(name, '¿Qué deseas hacer?', [
+                  { text: 'Crear solicitud', onPress: () => navigation.navigate('Form', { department: dept.name }) },
+                  { text: 'Ver actividades', onPress: () => navigation.navigate('Feed', { department: dept.name, filter: urgentCounts[dept.name] > 0 ? 'Proceso' : 'Completado' }) },
+                  { text: 'Cancelar', style: 'cancel' },
+                ]);
               }}
             >
               {urgentCounts[dept.name] > 0 && (
