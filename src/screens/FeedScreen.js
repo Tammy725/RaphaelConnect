@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,8 @@ export default function FeedScreen({ navigation }) {
   const { showToast } = useToast();
   const route = useRoute();
 
+  const prevDept = useRef(null);
+
   useFocusEffect(
     useCallback(() => {
       setPosts([...feedPosts]);
@@ -36,7 +38,7 @@ export default function FeedScreen({ navigation }) {
       if (department) {
         setDeptFilter(department);
         setFilter(routeFilter || 'Proceso');
-        navigation.setParams({ department: undefined, filter: undefined });
+        prevDept.current = department;
       }
     }, [])
   );
