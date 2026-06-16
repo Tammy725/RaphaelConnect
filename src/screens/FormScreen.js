@@ -241,7 +241,19 @@ export default function FormScreen({ route, navigation }) {
     }
   }, [matchedItem, closeAlert, navigation]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback((skipValidation) => {
+    if (!skipValidation) {
+      const missing = [];
+      if (!title.trim()) missing.push('Título');
+      if (!description.trim()) missing.push('Descripción');
+      if (!location) missing.push('Sucursal');
+      if (!date.trim()) missing.push('Fecha requerida');
+      if (missing.length) {
+        Alert.alert('Campos requeridos', 'Completá los siguientes campos:\n• ' + missing.join('\n• '));
+        return false;
+      }
+    }
+
     const words = [title, description].filter(Boolean).join(' ');
     const result = findMatches(words);
 
@@ -289,7 +301,7 @@ export default function FormScreen({ route, navigation }) {
 
   useEffect(() => {
     if (route?.params?.autoSubmit && department) {
-      const showedModal = handleSubmit();
+      const showedModal = handleSubmit(true);
       navigation.setParams({ autoSubmit: undefined });
       if (showedModal) {
         setTimeout(() => {
