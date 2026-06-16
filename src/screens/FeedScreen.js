@@ -75,7 +75,17 @@ export default function FeedScreen({ navigation }) {
           ))}
         </View>
         <View style={styles.feedList}>
-          {filtered.map((post) => {
+          {filtered.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="documents-outline" size={36} color="#d1d1d6" />
+              <Text style={styles.emptyTitle}>
+                {deptFilter ? `Sin actividades en ${deptFilter}` : 'No hay actividades'}
+              </Text>
+              <Text style={styles.emptySub}>
+                {deptFilter ? 'Este departamento no tiene solicitudes aún' : 'Las solicitudes aparecerán aquí'}
+              </Text>
+            </View>
+          ) : filtered.map((post) => {
             const cfg = statusConfig[post.tag] || statusConfig.Nuevo;
             return (
             <View key={post.id} style={styles.feedCard}>
@@ -169,6 +179,9 @@ const styles = StyleSheet.create({
   feedTags: { flexDirection: 'row', gap: 6, marginTop: 10, flexWrap: 'wrap' },
   feedTag: { backgroundColor: '#f2f2f7', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
   feedTagText: { fontSize: 11, color: COLORS.textTertiary, fontWeight: '500' },
+  emptyState: { alignItems: 'center', paddingVertical: 40, paddingHorizontal: 20 },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: COLORS.textSecondary, marginTop: 12 },
+  emptySub: { fontSize: 13, color: '#aeaeb2', marginTop: 4, textAlign: 'center' },
   feedActions: { flexDirection: 'row', gap: 12, marginTop: 10, borderTopWidth: 0.5, borderTopColor: COLORS.border, paddingTop: 10 },
   feedActionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   feedActionText: { fontSize: 12, color: COLORS.textSecondary },
