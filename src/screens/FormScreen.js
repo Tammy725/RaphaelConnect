@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -40,20 +41,40 @@ export default function FormScreen({ route, navigation }) {
   const [showDeptPicker, setShowDeptPicker] = useState(false);
   const [title, setTitle] = useState('');
 
-  useEffect(() => {
-    const p = route?.params || {};
-    const dept = p.department;
-    if (dept) {
-      setDepartment(dept);
-      setTitle(p.templateTitle || '');
-      setDescription(p.templateDescription || '');
-      setLocation(p.templateLocation || '');
-      setDate(p.templateDate || '');
-      setAmount(p.templateAmount || '');
+  useFocusEffect(
+    useCallback(() => {
+      setDepartment(null);
+      setTitle('');
+      setDescription('');
+      setLocation('');
+      setDate('');
+      setAmount('');
       setPriority('media');
-      setShowDeptPicker(false);
-    }
-  }, [route?.params?.department]);
+      setShowInFeed(true);
+      setShowLocationPicker(false);
+
+      const p = route?.params || {};
+      const dept = p.department;
+      if (dept) {
+        setDepartment(dept);
+        setTitle(p.templateTitle || '');
+        setDescription(p.templateDescription || '');
+        setLocation(p.templateLocation || '');
+        setDate(p.templateDate || '');
+        setAmount(p.templateAmount || '');
+        setPriority('media');
+        setShowDeptPicker(false);
+        navigation.setParams({
+          department: undefined,
+          templateTitle: undefined,
+          templateDescription: undefined,
+          templateLocation: undefined,
+          templateDate: undefined,
+          templateAmount: undefined,
+        });
+      }
+    }, [route, navigation])
+  );
 
   const examples = {
     Compras: 'Comprar computadoras para las oficinas nuevas',
@@ -83,7 +104,7 @@ export default function FormScreen({ route, navigation }) {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
-  const [amount, setAmount] = useState(route?.params?.templateAmount || '');
+  const [amount, setAmount] = useState('');
   const [priority, setPriority] = useState('media');
   const [showInFeed, setShowInFeed] = useState(true);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -198,22 +219,22 @@ export default function FormScreen({ route, navigation }) {
             <Ionicons name="chevron-back-outline" size={18} color={COLORS.primary} />
             <Text style={styles.backText}>Inicio</Text>
           </TouchableOpacity>
-          <View style={styles.deptRow}>
-            <TouchableOpacity style={styles.deptHeader} onPress={openPicker} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.deptHeader} onPress={openPicker} activeOpacity={0.7}>
+            <View style={styles.deptRow}>
               <Text style={[styles.deptName, !department && styles.deptPlaceholder]}>
                 {department || 'Seleccionar departamento'}
               </Text>
               <Ionicons name="chevron-down" size={20} color={COLORS.text} />
-            </TouchableOpacity>
-            <View style={{ flex: 1 }} />
-            <TouchableOpacity onPress={() => Alert.alert('Guardar solicitud', 'Se guardará todo lo que has escrito hasta ahora.', [
-              { text: 'Cancelar', style: 'cancel' },
-              { text: 'Guardar', onPress: handleSubmit },
-            ])} style={styles.saveBtn}>
-              <Ionicons name="save-outline" size={20} color={COLORS.text} />
-              <Text style={styles.saveLabel}>Guardar</Text>
-            </TouchableOpacity>
-          </View>
+              <View style={{ flex: 1 }} />
+              <TouchableOpacity onPress={() => Alert.alert('Guardar solicitud', 'Se guardará todo lo que has escrito hasta ahora.', [
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Guardar', onPress: () => {} },
+              ])} style={styles.saveBtn}>
+                <Ionicons name="save-outline" size={20} color={COLORS.text} />
+                <Text style={styles.saveLabel}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {department ? (
@@ -522,7 +543,8 @@ const styles = StyleSheet.create({
   saveLabel: { fontSize: 9, color: COLORS.text, marginTop: 1, fontWeight: '500' },
   backText: { fontSize: 15, color: COLORS.primary, fontWeight: '500' },
   deptHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 20, paddingVertical: 8, paddingBottom: 14,
+    borderBottomWidth: 0.5, borderBottomColor: COLORS.borderLight,
   },
   deptName: { fontSize: 22, fontWeight: '700', color: COLORS.text, letterSpacing: -0.5 },
   deptPlaceholder: { color: COLORS.textSecondary, fontWeight: '500' },
@@ -564,7 +586,7 @@ const styles = StyleSheet.create({
     borderRadius: 14, padding: 16,
   },
   submitText: { fontSize: 16, fontWeight: '600', color: COLORS.white },
-  deptRow: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 20, paddingVertical: 8, paddingBottom: 14, borderBottomWidth: 0.5, borderBottomColor: COLORS.borderLight },
+  deptRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   pickerOverlay: { flex: 1, backgroundColor: COLORS.overlay, justifyContent: 'flex-end' },
   pickerSheet: {
     backgroundColor: COLORS.white, borderTopLeftRadius: 24, borderTopRightRadius: 24,
