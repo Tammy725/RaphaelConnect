@@ -33,7 +33,6 @@ export function ToastProvider({ children }) {
       {children}
       {visible && (
         <Animated.View style={[styles.toast, { opacity }]}>
-          <Ionicons name="check" size={16} color="#34c759" />
           <Text style={styles.toastText}>{message}</Text>
         </Animated.View>
       )}
