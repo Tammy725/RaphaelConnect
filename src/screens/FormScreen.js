@@ -193,10 +193,15 @@ export default function FormScreen({ route, navigation }) {
     <View style={styles.container}>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.formHeader}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('Home')}>
-            <Ionicons name="chevron-back-outline" size={18} color={COLORS.primary} />
-            <Text style={styles.backText}>Inicio</Text>
-          </TouchableOpacity>
+          <View style={styles.formHeaderTop}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('Home')}>
+              <Ionicons name="chevron-back-outline" size={18} color={COLORS.primary} />
+              <Text style={styles.backText}>Inicio</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSubmit} style={styles.saveBtn}>
+              <Ionicons name="save-outline" size={22} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity style={styles.deptHeader} onPress={openPicker} activeOpacity={0.7}>
             <View style={styles.deptRow}>
               <Text style={[styles.deptName, !department && styles.deptPlaceholder]}>
@@ -508,7 +513,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   scroll: { flex: 1 },
   formHeader: { backgroundColor: COLORS.white, paddingTop: 40, paddingBottom: 0 },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20, paddingTop: 14 },
+  formHeaderTop: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 20, paddingTop: 14,
+  },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  saveBtn: { padding: 4 },
   backText: { fontSize: 15, color: COLORS.primary, fontWeight: '500' },
   deptHeader: {
     paddingHorizontal: 20, paddingVertical: 8, paddingBottom: 14,
