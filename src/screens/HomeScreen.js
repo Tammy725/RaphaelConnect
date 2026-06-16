@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,7 +31,6 @@ const iconMap = {
 };
 
 export default function HomeScreen({ navigation }) {
-  const [search, setSearch] = useState('');
   const { showToast } = useToast();
 
   const urgentCounts = useMemo(() => {
@@ -45,13 +43,7 @@ export default function HomeScreen({ navigation }) {
     return counts;
   }, []);
 
-  const lower = search.toLowerCase().trim();
-  const departments = !lower
-    ? allDepts
-    : allDepts.filter(d =>
-        d.name.toLowerCase().includes(lower) ||
-        (d.short && d.short.toLowerCase().includes(lower))
-      );
+  const departments = allDepts;
 
   return (
     <View style={styles.container}>
@@ -71,34 +63,6 @@ export default function HomeScreen({ navigation }) {
               <Ionicons name="notifications-outline" size={20} color={COLORS.text} />
               <View style={styles.notifBadge} />
             </TouchableOpacity>
-          </View>
-          <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={18} color={COLORS.textSecondary} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Buscar departamentos, solicitudes..."
-              placeholderTextColor={COLORS.textSecondary}
-              value={search}
-              onChangeText={setSearch}
-            />
-          </View>
-        </View>
-
-        <View style={styles.quickStats}>
-          <View style={styles.statChip}>
-            <Text style={styles.statNum}>247</Text>
-            <Text style={styles.statLbl}>Solicitudes</Text>
-            <Text style={styles.statTrend}>↑ 12%</Text>
-          </View>
-          <View style={styles.statChip}>
-            <Text style={styles.statNum}>18</Text>
-            <Text style={styles.statLbl}>Activas</Text>
-            <Text style={styles.statTrend}>↑ 3</Text>
-          </View>
-          <View style={styles.statChip}>
-            <Text style={styles.statNum}>94%</Text>
-            <Text style={styles.statLbl}>Eficiencia</Text>
-            <Text style={[styles.statTrend, { color: '#8e8e93' }]}>→ estable</Text>
           </View>
         </View>
 
@@ -169,16 +133,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16, marginTop: 14, gap: 8,
   },
   searchInput: { flex: 1, fontSize: 15, color: COLORS.text },
-  quickStats: {
-    flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12,
-  },
-  statChip: {
-    flex: 1, backgroundColor: COLORS.white, borderRadius: 12, padding: 12,
-    alignItems: 'center', borderWidth: 0.5, borderColor: COLORS.border,
-  },
-  statNum: { fontSize: 20, fontWeight: '700', color: COLORS.primary },
-  statLbl: { fontSize: 10, color: COLORS.textSecondary, fontWeight: '500', marginTop: 2 },
-  statTrend: { fontSize: 10, color: '#34c759', fontWeight: '700', marginTop: 3 },
   urgentBadge: {
     position: 'absolute', top: 10, right: 10, width: 20, height: 20,
     backgroundColor: COLORS.high, borderRadius: 10,
@@ -187,7 +141,7 @@ const styles = StyleSheet.create({
   urgentText: { fontSize: 10, fontWeight: '800', color: COLORS.white },
   sectionTitle: {
     fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
-    textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 20, paddingBottom: 8,
+    textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8,
   },
   deptGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 16, justifyContent: 'center' },
   deptCard: {

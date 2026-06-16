@@ -202,7 +202,6 @@ export default function FormScreen({ route, navigation }) {
               {department || 'Seleccionar departamento'}
             </Text>
             <View style={styles.deptRow}>
-              <Text style={styles.deptSub}>Nueva solicitud</Text>
               <Ionicons name="chevron-down" size={14} color={COLORS.textSecondary} />
             </View>
           </TouchableOpacity>
