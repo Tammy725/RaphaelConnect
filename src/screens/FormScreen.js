@@ -205,7 +205,8 @@ export default function FormScreen({ route, navigation }) {
               <Ionicons name="chevron-down" size={20} color={COLORS.text} />
               <View style={{ flex: 1 }} />
               <TouchableOpacity onPress={handleSubmit} style={styles.saveBtn}>
-                <Ionicons name="save-outline" size={22} color={COLORS.text} />
+                <Ionicons name="save-outline" size={20} color={COLORS.text} />
+                <Text style={styles.saveLabel}>Guardar</Text>
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
@@ -513,7 +514,8 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   formHeader: { backgroundColor: COLORS.white, paddingTop: 40, paddingBottom: 0 },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20, paddingTop: 14 },
-  saveBtn: { padding: 4 },
+  saveBtn: { alignItems: 'center', justifyContent: 'center', padding: 2 },
+  saveLabel: { fontSize: 9, color: COLORS.text, marginTop: 1, fontWeight: '500' },
   backText: { fontSize: 15, color: COLORS.primary, fontWeight: '500' },
   deptHeader: {
     paddingHorizontal: 20, paddingVertical: 8, paddingBottom: 14,
