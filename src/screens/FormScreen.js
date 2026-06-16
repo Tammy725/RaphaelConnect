@@ -48,6 +48,7 @@ export default function FormScreen({ route, navigation }) {
     const p = route?.params || {};
     const dept = p.department;
     if (dept) {
+      pendingNavRef.current = true;
       setDepartment(dept);
       setTitle(p.templateTitle || '');
       setDescription(p.templateDescription || '');
@@ -65,33 +66,6 @@ export default function FormScreen({ route, navigation }) {
       });
     }
   }, [route?.params?.department]);
-
-  useFocusEffect(
-    useCallback(() => {
-      setShowLocationPicker(false);
-      const p = route?.params || {};
-      if (!p.department) {
-        const draft = draftRef.current;
-        if (draft) {
-          setDepartment(draft.department);
-          setTitle(draft.title);
-          setDescription(draft.description);
-          setLocation(draft.location);
-          setDate(draft.date);
-          setPriority(draft.priority);
-          setShowInFeed(draft.showInFeed);
-        } else {
-          setDepartment(null);
-          setTitle('');
-          setDescription('');
-          setLocation('');
-          setDate('');
-          setPriority('media');
-          setShowInFeed(true);
-        }
-      }
-    }, [route?.params?.department])
-  );
 
   const examples = {
     Compras: 'Comprar computadoras para las oficinas nuevas',
@@ -130,6 +104,7 @@ export default function FormScreen({ route, navigation }) {
   const pickerSlideAnim = useRef(new Animated.Value(0)).current;
   const { showToast } = useToast();
   const draftRef = useRef(null);
+  const pendingNavRef = useRef(false);
   const focusCallbackRef = useRef(() => {});
 
   useFocusEffect(
@@ -140,6 +115,10 @@ export default function FormScreen({ route, navigation }) {
 
   focusCallbackRef.current = () => {
     setShowLocationPicker(false);
+    if (pendingNavRef.current) {
+      pendingNavRef.current = false;
+      return;
+    }
     const p = route?.params || {};
     if (!p.department) {
       const draft = draftRef.current;
