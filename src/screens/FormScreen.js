@@ -48,13 +48,6 @@ export default function FormScreen({ route, navigation }) {
     }
   }, [route?.params?.department]);
 
-  useEffect(() => {
-    if (route?.params?.openPicker) {
-      setShowDeptPicker(true);
-      navigation.setParams({ openPicker: undefined });
-    }
-  }, [route?.params?.openPicker, navigation]);
-
   const examples = {
     Compras: 'Comprar computadoras para las oficinas nuevas',
     Tecnología: 'Reparar mi computadora que no enciende',
@@ -78,6 +71,28 @@ export default function FormScreen({ route, navigation }) {
   const [showAlert, setShowAlert] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const alertTimeout = useRef(null);
+  const pickerSlideAnim = useRef(new Animated.Value(0)).current;
+
+  const openPicker = useCallback(() => {
+    setShowDeptPicker(true);
+    Animated.spring(pickerSlideAnim, {
+      toValue: 1, useNativeDriver: true, damping: 20, stiffness: 90,
+    }).start();
+  }, [pickerSlideAnim]);
+
+  const closePicker = useCallback(() => {
+    Animated.timing(pickerSlideAnim, {
+      toValue: 0, duration: 200, useNativeDriver: true,
+    }).start(() => setShowDeptPicker(false));
+  }, [pickerSlideAnim]);
+
+  useEffect(() => {
+    if (route?.params?.openPicker) {
+      openPicker();
+      navigation.setParams({ openPicker: undefined });
+    }
+  }, [route?.params?.openPicker, navigation]);
+
   const checkDuplicate = useCallback((val) => {
     if (alertTimeout.current) clearTimeout(alertTimeout.current);
     const lower = val.toLowerCase();
@@ -117,7 +132,7 @@ export default function FormScreen({ route, navigation }) {
             <Ionicons name="chevron-back-outline" size={18} color={COLORS.primary} />
             <Text style={styles.backText}>Inicio</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deptHeader} onPress={() => setShowDeptPicker(true)} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.deptHeader} onPress={openPicker} activeOpacity={0.7}>
             <Text style={[styles.deptName, !department && styles.deptPlaceholder]}>
               {department || 'Seleccionar departamento'}
             </Text>
@@ -228,14 +243,20 @@ export default function FormScreen({ route, navigation }) {
         )}
       </ScrollView>
 
-      {showDeptPicker && (
-        <Modal visible={showDeptPicker} transparent animationType="none">
-          <View style={styles.pickerOverlay}>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setShowDeptPicker(false)} />
-            <View style={styles.pickerSheet}>
+      <Modal visible={showDeptPicker} transparent animationType="none">
+        <TouchableOpacity style={styles.pickerOverlay} activeOpacity={1} onPress={closePicker}>
+          <Animated.View style={[styles.pickerSheet, {
+            transform: [{
+              translateY: pickerSlideAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [600, 0],
+              }),
+            }],
+          }]}>
+            <TouchableOpacity activeOpacity={1}>
               <View style={styles.pickerHeader}>
                 <Text style={styles.pickerTitle}>Seleccionar departamento</Text>
-                <TouchableOpacity onPress={() => setShowDeptPicker(false)}>
+                <TouchableOpacity onPress={closePicker}>
                   <Text style={styles.pickerClose}>✕</Text>
                 </TouchableOpacity>
               </View>
@@ -250,7 +271,7 @@ export default function FormScreen({ route, navigation }) {
                     activeOpacity={0.7}
                     onPress={() => {
                       setDepartment(dept.name);
-                      setShowDeptPicker(false);
+                      closePicker();
                     }}
                   >
                     <View style={[styles.pickerIcon, { backgroundColor: dept.bg }]}>
@@ -262,10 +283,10 @@ export default function FormScreen({ route, navigation }) {
                   </TouchableOpacity>
                 ))}
               </View>
-            </View>
-          </View>
-        </Modal>
-      )}
+            </TouchableOpacity>
+          </Animated.View>
+        </TouchableOpacity>
+      </Modal>
 
       <Modal visible={showAlert} transparent animationType="none">
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={closeAlert}>
