@@ -12,6 +12,8 @@ import {
   Switch,
   Linking,
   Alert,
+  Keyboard,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
@@ -241,7 +243,8 @@ export default function FormScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <Pressable onPress={Keyboard.dismiss}>
         <View style={styles.formHeader}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('Home')}>
             <Ionicons name="chevron-back-outline" size={18} color={COLORS.primary} />
@@ -438,6 +441,7 @@ export default function FormScreen({ route, navigation }) {
             </Text>
           </View>
         )}
+        </Pressable>
       </ScrollView>
 
       <Modal visible={showDeptPicker} transparent animationType="none">
