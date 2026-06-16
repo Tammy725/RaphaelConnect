@@ -277,7 +277,17 @@ export default function FormScreen({ route, navigation }) {
                 placeholder="DD/MM/YYYY"
                 placeholderTextColor="#c7c7cc"
                 value={date}
-                onChangeText={setDate}
+                keyboardType="number-pad"
+                maxLength={10}
+                onChangeText={(text) => {
+                  const digits = text.replace(/[^\d]/g, '').slice(0, 8);
+                  let formatted = '';
+                  for (let i = 0; i < digits.length; i++) {
+                    if (i === 2 || i === 4) formatted += '/';
+                    formatted += digits[i];
+                  }
+                  setDate(formatted);
+                }}
               />
             </View>
             <View style={styles.formRow}>
