@@ -10,15 +10,30 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../constants/theme';
 import { feedPosts } from '../data/feed';
+import { useToast } from '../context/ToastContext';
+
+const FILTERS = ['Todos', 'Completado', 'Proceso'];
+
+const statusConfig = {
+  Nuevo: { icon: 'ellipse', color: '#5b4adb', bg: '#e8f0ff' },
+  Completado: { icon: 'checkmark-circle', color: '#34c759', bg: '#eafaf0' },
+  Proceso: { icon: 'ellipse', color: '#5b4adb', bg: '#e8f0ff' },
+  Pendiente: { icon: 'ellipse', color: '#ff9500', bg: '#fff8ec' },
+};
 
 export default function FeedScreen() {
   const [posts, setPosts] = useState([...feedPosts]);
+  const [filter, setFilter] = useState('Todos');
+  const [liked, setLiked] = useState({});
+  const { showToast } = useToast();
 
   useFocusEffect(
     useCallback(() => {
       setPosts([...feedPosts]);
     }, [])
   );
+
+  const filtered = filter === 'Todos' ? posts : posts.filter(p => p.tag === filter);
 
   return (
     <View style={styles.container}>
@@ -27,8 +42,21 @@ export default function FeedScreen() {
         <Text style={styles.headerSub}>Feed empresarial en tiempo real</Text>
       </View>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.filters}>
+          {FILTERS.map((f) => (
+            <TouchableOpacity
+              key={f}
+              style={[styles.filterPill, filter === f && styles.filterPillActive]}
+              onPress={() => setFilter(f)}
+            >
+              <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         <View style={styles.feedList}>
-          {posts.map((post) => (
+          {filtered.map((post) => {
+            const cfg = statusConfig[post.tag] || statusConfig.Nuevo;
+            return (
             <View key={post.id} style={styles.feedCard}>
               <View style={styles.feedHeader}>
                 <View style={[styles.feedAvatar, { backgroundColor: post.avatarBg }]}>
@@ -38,13 +66,9 @@ export default function FeedScreen() {
                   <Text style={styles.feedDept}>{post.department}</Text>
                   <Text style={styles.feedTime}>{post.time}</Text>
                 </View>
-                <View style={[styles.tagChip, { backgroundColor: post.tagColor + '1A' }]}>
-                  <Ionicons
-                    name={post.tagIcon === 'ellipse' ? 'ellipse' : 'checkmark-circle'}
-                    size={12}
-                    color={post.tagColor}
-                  />
-                  <Text style={[styles.tagChipText, { color: post.tagColor }]}>{post.tag}</Text>
+                <View style={[styles.tagChip, { backgroundColor: cfg.bg }]}>
+                  <Ionicons name={cfg.icon} size={12} color={cfg.color} />
+                  <Text style={[styles.tagChipText, { color: cfg.color }]}>{post.tag}</Text>
                 </View>
               </View>
               <Text style={styles.feedBody}>{post.body}</Text>
@@ -61,20 +85,25 @@ export default function FeedScreen() {
                 ))}
               </View>
               <View style={styles.feedActions}>
-                <TouchableOpacity style={styles.feedActionBtn}>
-                  <Ionicons name="thumbs-up-outline" size={14} color={COLORS.textSecondary} />
-                  <Text style={styles.feedActionText}>{post.likes}</Text>
+                <TouchableOpacity style={styles.feedActionBtn} onPress={() => {
+                  setLiked(p => ({ ...p, [post.id]: !p[post.id] }));
+                  if (!liked[post.id]) showToast('👍 Like');
+                }}>
+                  <Ionicons name={liked[post.id] ? 'thumbs-up' : 'thumbs-up-outline'} size={14} color={liked[post.id] ? COLORS.primary : COLORS.textSecondary} />
+                  <Text style={[styles.feedActionText, liked[post.id] && { color: COLORS.primary }]}>
+                    {post.likes + (liked[post.id] ? 1 : 0)}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.feedActionBtn}>
                   <Ionicons name="chatbubble-outline" size={14} color={COLORS.textSecondary} />
                   <Text style={styles.feedActionText}>{post.comments}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.feedActionBtn}>
+                <TouchableOpacity style={styles.feedActionBtn} onPress={() => showToast('🔗 Enlace copiado')}>
                   <Ionicons name="share-outline" size={14} color={COLORS.textSecondary} />
                 </TouchableOpacity>
               </View>
             </View>
-          ))}
+          )})}
         </View>
         <View style={{ height: 20 }} />
       </ScrollView>
@@ -91,7 +120,15 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 28, fontWeight: '700', color: COLORS.text, letterSpacing: -0.5 },
   headerSub: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
   scroll: { flex: 1 },
-  feedList: { paddingHorizontal: 16, paddingTop: 12, gap: 10 },
+  filters: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4 },
+  filterPill: {
+    paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
+    backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.08)',
+  },
+  filterPillActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  filterText: { fontSize: 12, fontWeight: '700', color: '#636366' },
+  filterTextActive: { color: COLORS.white },
+  feedList: { paddingHorizontal: 16, paddingTop: 8, gap: 10 },
   feedCard: { backgroundColor: COLORS.white, borderRadius: 16, padding: 14, borderWidth: 0.5, borderColor: COLORS.border },
   feedHeader: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', marginBottom: 10 },
   feedAvatar: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },

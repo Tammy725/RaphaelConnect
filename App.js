@@ -11,6 +11,7 @@ import FeedScreen from './src/screens/FeedScreen';
 import FormScreen from './src/screens/FormScreen';
 import KnowledgeScreen from './src/screens/KnowledgeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import { ToastProvider } from './src/context/ToastContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -80,6 +81,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <StatusBar style="dark" />
+      <ToastProvider>
       <Tab.Navigator
         tabBar={(props) => <CustomTabBar {...props} />}
         screenOptions={{ headerShown: false }}
@@ -90,6 +92,7 @@ export default function App() {
         <Tab.Screen name="Knowledge" component={KnowledgeScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
+      </ToastProvider>
     </NavigationContainer>
   );
 }

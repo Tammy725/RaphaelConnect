@@ -10,69 +10,81 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 
-const KNOWLEDGE_DATA = {
-  'aire acondicionado': [
-    {
-      icon: '🛒',
-      title: 'Compra: Aires Acondicionados Samsung',
-      subtitle: 'Compras · Hace 2 meses',
-      rows: [
-        { key: 'Cantidad', val: '3 unidades (18,000 BTU)' },
-        { key: 'Proveedor', val: 'Distribuidora Techno S.A.' },
-        { key: 'Costo total', val: '$4,200.00' },
-        { key: 'Costo unit.', val: '$1,400.00' },
-        { key: 'Ubicación', val: 'San Miguelito' },
-        { key: 'Responsable', val: 'María López' },
-        { key: 'Estado', val: 'Completado', valColor: '#34c759' },
-      ],
-    },
-    {
-      icon: '⚙️',
-      title: 'Mantenimiento: Equipos HVAC',
-      subtitle: 'Operaciones · Hace 5 meses',
-      rows: [
-        { key: 'Servicio', val: 'Limpieza y recarga de gas' },
-        { key: 'Proveedor', val: 'CoolTech Panamá' },
-        { key: 'Costo', val: '$350.00' },
-        { key: 'Responsable', val: 'Carlos Ramos' },
-      ],
-    },
-  ],
-  'aire': [
-    {
-      icon: '🛒',
-      title: 'Compra: Aires Acondicionados Samsung',
-      subtitle: 'Compras · Hace 2 meses',
-      rows: [
-        { key: 'Cantidad', val: '3 unidades (18,000 BTU)' },
-        { key: 'Proveedor', val: 'Distribuidora Techno S.A.' },
-        { key: 'Costo total', val: '$4,200.00' },
-        { key: 'Costo unit.', val: '$1,400.00' },
-        { key: 'Ubicación', val: 'San Miguelito' },
-        { key: 'Responsable', val: 'María López' },
-        { key: 'Estado', val: 'Completado', valColor: '#34c759' },
-      ],
-    },
-  ],
-  'samsung': [
-    {
-      icon: '🛒',
-      title: 'Compra: Aires Acondicionados Samsung',
-      subtitle: 'Compras · Hace 2 meses',
-      rows: [
-        { key: 'Cantidad', val: '3 unidades (18,000 BTU)' },
-        { key: 'Proveedor', val: 'Distribuidora Techno S.A.' },
-        { key: 'Costo total', val: '$4,200.00' },
-        { key: 'Costo unit.', val: '$1,400.00' },
-        { key: 'Ubicación', val: 'San Miguelito' },
-        { key: 'Responsable', val: 'María López' },
-        { key: 'Estado', val: 'Completado', valColor: '#34c759' },
-      ],
-    },
-  ],
-};
-
-const ALL_ENTRIES = Object.values(KNOWLEDGE_DATA).flat();
+const ALL_ENTRIES = [
+  {
+    keywords: ['aire', 'acondicionado', 'hvac', 'samsung', 'frio', 'climatizacion'],
+    icon: '🛒',
+    title: 'Compra: Aires Acondicionados Samsung',
+    subtitle: 'Compras · Hace 2 meses',
+    rows: [
+      { key: 'Cantidad', val: '3 unidades (18,000 BTU)' },
+      { key: 'Proveedor', val: 'Distribuidora Techno S.A.' },
+      { key: 'Costo total', val: '$4,200.00' },
+      { key: 'Costo unit.', val: '$1,400.00' },
+      { key: 'Ubicación', val: 'San Miguelito' },
+      { key: 'Responsable', val: 'María López' },
+      { key: 'Estado', val: 'Completado', valColor: '#34c759' },
+    ],
+    tip: 'Antes de crear una nueva solicitud de aire acondicionado, contacta a María López o revisa el inventario actual en San Miguelito.',
+  },
+  {
+    keywords: ['hvac', 'mantenimiento', 'operaciones', 'cooltech', 'gas', 'limpieza'],
+    icon: '⚙️',
+    title: 'Mantenimiento: Equipos HVAC',
+    subtitle: 'Operaciones · Hace 5 meses',
+    rows: [
+      { key: 'Servicio', val: 'Limpieza y recarga de gas' },
+      { key: 'Proveedor', val: 'CoolTech Panamá' },
+      { key: 'Costo', val: '$350.00' },
+      { key: 'Responsable', val: 'Carlos Ramos' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['laptop', 'dell', 'computadora', 'tecnologia', 'hardware', 'equipo', 'pc'],
+    icon: '💻',
+    title: 'Compra: Laptops Dell Latitude 5540',
+    subtitle: 'Tecnología · Hace 5 horas',
+    rows: [
+      { key: 'Cantidad', val: '15 unidades' },
+      { key: 'Proveedor', val: 'Dell Panamá' },
+      { key: 'Costo total', val: '$22,500.00' },
+      { key: 'Costo unit.', val: '$1,500.00' },
+      { key: 'Área', val: 'Desarrollo' },
+      { key: 'Responsable', val: 'Roberto Salas' },
+      { key: 'Estado', val: 'Completado', valColor: '#34c759' },
+    ],
+    tip: 'Para futuras compras de hardware, Dell Panamá ofrece descuentos por volumen superior a 10 unidades.',
+  },
+  {
+    keywords: ['marketing', 'campana', 'digital', 'redes', 'publicidad', 'q2'],
+    icon: '📢',
+    title: 'Campaña Digital Q2 2026',
+    subtitle: 'Marketing · Hace 2 días',
+    rows: [
+      { key: 'Tipo', val: 'Redes sociales + display' },
+      { key: 'Presupuesto', val: '$8,500.00' },
+      { key: 'Alcance', val: '+38% vs Q1' },
+      { key: 'Responsable', val: 'Ana Torres' },
+      { key: 'Estado', val: 'Completado', valColor: '#34c759' },
+    ],
+    tip: null,
+  },
+  {
+    keywords: ['contratacion', 'rrhh', 'recursos humanos', 'colaborador', 'onboarding', 'personal', 'empleado'],
+    icon: '👥',
+    title: 'Contratación: Atención al Cliente',
+    subtitle: 'RRHH · Ayer',
+    rows: [
+      { key: 'Nuevos colaboradores', val: '4 personas' },
+      { key: 'Área', val: 'Atención al Cliente' },
+      { key: 'Inicio', val: 'Lunes 17 junio 2026' },
+      { key: 'Responsable', val: 'Laura Méndez' },
+      { key: 'Estado', val: 'En proceso', valColor: '#5b4adb' },
+    ],
+    tip: 'Los nuevos colaboradores requieren acceso a sistemas. Coordinar con Tecnología.',
+  },
+];
 
 export default function KnowledgeScreen() {
   const [query, setQuery] = useState('');
@@ -81,9 +93,11 @@ export default function KnowledgeScreen() {
   const results = !lower
     ? ALL_ENTRIES
     : ALL_ENTRIES.filter((item) => {
-        const searchText = `${item.title} ${item.subtitle} ${item.rows.map(r => `${r.key} ${r.val}`).join(' ')}`.toLowerCase();
-        return searchText.includes(lower);
+        const kw = item.keywords.some(k => k.startsWith(lower) || k.includes(lower));
+        const text = `${item.title} ${item.subtitle}`.toLowerCase().includes(lower);
+        return kw || text;
       });
+  const firstTip = results.find(r => r.tip);
 
   return (
     <View style={styles.root}>
@@ -133,15 +147,15 @@ export default function KnowledgeScreen() {
                   </View>
                 </View>
               ))}
-              <View style={styles.suggestionCard}>
-                <View style={styles.suggestionRow}>
-                  <Ionicons name="bulb-outline" size={14} color={COLORS.primary} style={{ marginRight: 4 }} />
-                  <Text style={styles.suggestionTitle}>Sugerencia IA</Text>
+              {firstTip && (
+                <View style={styles.suggestionCard}>
+                  <View style={styles.suggestionRow}>
+                    <Ionicons name="bulb-outline" size={14} color={COLORS.primary} style={{ marginRight: 4 }} />
+                    <Text style={styles.suggestionTitle}>Sugerencia</Text>
+                  </View>
+                  <Text style={styles.suggestionText}>{firstTip.tip}</Text>
                 </View>
-                <Text style={styles.suggestionText}>
-                  Antes de crear una nueva solicitud de aire acondicionado, considera contactar a María López o revisar los equipos actuales en San Miguelito.
-                </Text>
-              </View>
+              )}
               <View style={{ height: 20 }} />
             </>
           ) : (

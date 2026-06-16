@@ -69,6 +69,7 @@ export default function FormScreen({ route, navigation }) {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
+  const [amount, setAmount] = useState('');
   const [priority, setPriority] = useState('media');
   const [showInFeed, setShowInFeed] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
@@ -221,6 +222,17 @@ export default function FormScreen({ route, navigation }) {
                 placeholderTextColor="#c7c7cc"
                 value={date}
                 onChangeText={setDate}
+              />
+            </View>
+            <View style={styles.formRow}>
+              <Text style={styles.formLabel}>Monto estimado (opcional)</Text>
+              <TextInput
+                style={styles.formInput}
+                placeholder="$0.00"
+                placeholderTextColor="#c7c7cc"
+                value={amount}
+                onChangeText={setAmount}
+                keyboardType="decimal-pad"
               />
             </View>
           </View>

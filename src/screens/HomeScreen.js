@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
-import { departments } from '../data/departments';
+import { departments as allDepts } from '../data/departments';
+import { feedPosts } from '../data/feed';
+import { useToast } from '../context/ToastContext';
 
 const iconMap = {
   cart: 'cart-outline',
@@ -29,6 +31,27 @@ const iconMap = {
 };
 
 export default function HomeScreen({ navigation }) {
+  const [search, setSearch] = useState('');
+  const { showToast } = useToast();
+
+  const urgentCounts = useMemo(() => {
+    const counts = {};
+    feedPosts.forEach(p => {
+      if (p.tag !== 'Completado') {
+        counts[p.department] = (counts[p.department] || 0) + 1;
+      }
+    });
+    return counts;
+  }, []);
+
+  const lower = search.toLowerCase().trim();
+  const departments = !lower
+    ? allDepts
+    : allDepts.filter(d =>
+        d.name.toLowerCase().includes(lower) ||
+        (d.short && d.short.toLowerCase().includes(lower))
+      );
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -43,7 +66,7 @@ export default function HomeScreen({ navigation }) {
                 <Text style={styles.logoSub}>Panel de inicio</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.notifBtn}>
+            <TouchableOpacity style={styles.notifBtn} onPress={() => showToast('📬 3 notificaciones pendientes')}>
               <Ionicons name="notifications-outline" size={20} color={COLORS.text} />
               <View style={styles.notifBadge} />
             </TouchableOpacity>
@@ -54,6 +77,8 @@ export default function HomeScreen({ navigation }) {
               style={styles.searchInput}
               placeholder="Buscar departamentos, solicitudes..."
               placeholderTextColor={COLORS.textSecondary}
+              value={search}
+              onChangeText={setSearch}
             />
           </View>
         </View>
@@ -62,14 +87,17 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.statChip}>
             <Text style={styles.statNum}>247</Text>
             <Text style={styles.statLbl}>Solicitudes</Text>
+            <Text style={styles.statTrend}>↑ 12%</Text>
           </View>
           <View style={styles.statChip}>
             <Text style={styles.statNum}>18</Text>
             <Text style={styles.statLbl}>Activas</Text>
+            <Text style={styles.statTrend}>↑ 3</Text>
           </View>
           <View style={styles.statChip}>
             <Text style={styles.statNum}>94%</Text>
             <Text style={styles.statLbl}>Eficiencia</Text>
+            <Text style={[styles.statTrend, { color: '#8e8e93' }]}>→ estable</Text>
           </View>
         </View>
 
@@ -82,6 +110,11 @@ export default function HomeScreen({ navigation }) {
               activeOpacity={0.7}
               onPress={() => navigation.navigate('Form', { department: dept.name })}
             >
+              {urgentCounts[dept.name] > 0 && (
+                <View style={styles.urgentBadge}>
+                  <Text style={styles.urgentText}>{urgentCounts[dept.name]}</Text>
+                </View>
+              )}
               <View style={[styles.deptIcon, { backgroundColor: dept.bg }]}>
                 <Ionicons name={iconMap[dept.icon] || 'folder-outline'} size={20} color={COLORS.primary} />
               </View>
@@ -137,13 +170,20 @@ const styles = StyleSheet.create({
   },
   statNum: { fontSize: 20, fontWeight: '700', color: COLORS.primary },
   statLbl: { fontSize: 10, color: COLORS.textSecondary, fontWeight: '500', marginTop: 2 },
+  statTrend: { fontSize: 10, color: '#34c759', fontWeight: '700', marginTop: 3 },
+  urgentBadge: {
+    position: 'absolute', top: 10, right: 10, width: 20, height: 20,
+    backgroundColor: COLORS.high, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center', zIndex: 10,
+  },
+  urgentText: { fontSize: 10, fontWeight: '800', color: COLORS.white },
   sectionTitle: {
     fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
     textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 20, paddingBottom: 8,
   },
   deptGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 16, justifyContent: 'center' },
   deptCard: {
-    width: '47%', backgroundColor: COLORS.white, borderRadius: 16, padding: 14,
+    width: '48%', backgroundColor: COLORS.white, borderRadius: 16, padding: 14,
     borderWidth: 0.5, borderColor: COLORS.border,
   },
   deptIcon: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
