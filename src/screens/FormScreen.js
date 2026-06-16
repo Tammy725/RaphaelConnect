@@ -57,7 +57,6 @@ export default function FormScreen({ route, navigation }) {
         setDescription(p.templateDescription || '');
         setLocation(p.templateLocation || '');
         setDate(p.templateDate || '');
-        setAmount(p.templateAmount || '');
         setPriority('media');
         setShowInFeed(true);
         setShowDeptPicker(false);
@@ -67,7 +66,6 @@ export default function FormScreen({ route, navigation }) {
           templateDescription: undefined,
           templateLocation: undefined,
           templateDate: undefined,
-          templateAmount: undefined,
         });
       } else if (draftRef.current) {
         const draft = draftRef.current;
@@ -76,7 +74,6 @@ export default function FormScreen({ route, navigation }) {
         setDescription(draft.description);
         setLocation(draft.location);
         setDate(draft.date);
-        setAmount(draft.amount);
         setPriority(draft.priority);
         setShowInFeed(draft.showInFeed);
       } else {
@@ -85,7 +82,6 @@ export default function FormScreen({ route, navigation }) {
         setDescription('');
         setLocation('');
         setDate('');
-        setAmount('');
         setPriority('media');
         setShowInFeed(true);
       }
@@ -120,7 +116,6 @@ export default function FormScreen({ route, navigation }) {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
-  const [amount, setAmount] = useState('');
   const [priority, setPriority] = useState('media');
   const [showInFeed, setShowInFeed] = useState(true);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -138,12 +133,11 @@ export default function FormScreen({ route, navigation }) {
       description,
       location,
       date,
-      amount,
       priority,
       showInFeed,
     };
     showToast('📝 Borrador guardado');
-  }, [department, title, description, location, date, amount, priority, showInFeed]);
+  }, [department, title, description, location, date, priority, showInFeed]);
 
   const copyFromMatch = useCallback(() => {
     if (!matchedItem) return;
@@ -152,7 +146,6 @@ export default function FormScreen({ route, navigation }) {
       setTitle(e.title);
       setDescription(e.rows.map(r => `${r.key}: ${r.val}`).join('. '));
       setLocation(e.rows.find(r => r.key === 'Ubicación')?.val || '');
-      setAmount(e.rows.find(r => r.key.includes('Costo'))?.val || '');
     }
     closeAlert();
     showToast('📋 Datos copiados al formulario');
@@ -297,7 +290,7 @@ export default function FormScreen({ route, navigation }) {
       navigation.navigate('Feed', { department, filter: 'Nuevo' });
       return false;
     }
-  }, [slideAnim, showInFeed, department, title, description, location, date, amount, priority, navigation, findMatches, showToast]);
+  }, [slideAnim, showInFeed, department, title, description, location, date, priority, navigation, findMatches, showToast]);
 
   useEffect(() => {
     if (route?.params?.autoSubmit && department) {
@@ -439,17 +432,6 @@ export default function FormScreen({ route, navigation }) {
                   }
                   setDate(formatted);
                 }}
-              />
-            </View>
-            <View style={styles.formRow}>
-              <Text style={styles.formLabel}>Monto estimado (opcional)</Text>
-              <TextInput
-                style={styles.formInput}
-                placeholder="$0.00"
-                placeholderTextColor="#c7c7cc"
-                value={amount}
-                onChangeText={setAmount}
-                keyboardType="decimal-pad"
               />
             </View>
           </View>
