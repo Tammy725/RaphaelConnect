@@ -139,7 +139,7 @@ export default function FormScreen({ route, navigation }) {
       priority,
       showInFeed,
     };
-    showToast('📝 Borrador guardado');
+    showToast('Borrador guardado');
   }, [department, title, description, location, date, amount, priority, showInFeed]);
 
   const copyPreviousRequest = useCallback(() => {
