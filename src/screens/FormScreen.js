@@ -10,6 +10,7 @@ import {
   Animated,
   Switch,
   Linking,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
@@ -204,7 +205,10 @@ export default function FormScreen({ route, navigation }) {
               </Text>
               <Ionicons name="chevron-down" size={20} color={COLORS.text} />
               <View style={{ flex: 1 }} />
-              <TouchableOpacity onPress={handleSubmit} style={styles.saveBtn}>
+              <TouchableOpacity onPress={() => Alert.alert('Guardar solicitud', '¿Estás seguro de guardar esta solicitud?', [
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Guardar', onPress: handleSubmit },
+              ])} style={styles.saveBtn}>
                 <Ionicons name="save-outline" size={20} color={COLORS.text} />
                 <Text style={styles.saveLabel}>Guardar</Text>
               </TouchableOpacity>
