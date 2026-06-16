@@ -281,6 +281,24 @@ export default function FormScreen({ route, navigation }) {
                 maxLength={10}
                 onChangeText={(text) => {
                   const digits = text.replace(/[^\d]/g, '').slice(0, 8);
+                  const prev = date.replace(/\//g, '');
+                  if (digits.length < prev.length) {
+                    let f = '';
+                    for (let i = 0; i < digits.length; i++) {
+                      if (i === 2 || i === 4) f += '/';
+                      f += digits[i];
+                    }
+                    setDate(f);
+                    return;
+                  }
+                  const d = parseInt(digits.slice(0, 2), 10);
+                  const m = parseInt(digits.slice(2, 4), 10);
+                  if (digits.length >= 2 && (d < 1 || d > 31)) return;
+                  if (digits.length >= 4 && (m < 1 || m > 12)) return;
+                  if (digits.length >= 4) {
+                    if (d > 30 && [4, 6, 9, 11].includes(m)) return;
+                    if (d > 29 && m === 2) return;
+                  }
                   let formatted = '';
                   for (let i = 0; i < digits.length; i++) {
                     if (i === 2 || i === 4) formatted += '/';
