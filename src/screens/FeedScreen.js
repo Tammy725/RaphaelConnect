@@ -21,29 +21,22 @@ const statusConfig = {
   Pendiente: { icon: 'ellipse', color: '#ff9500', bg: '#fff8ec' },
 };
 
-export default function FeedScreen({ navigation }) {
+export default function FeedScreen({ navigation, route }) {
   const [posts, setPosts] = useState([...feedPosts]);
   const [filter, setFilter] = useState('Todos');
   const [deptFilter, setDeptFilter] = useState(null);
   const [liked, setLiked] = useState({});
   const { showToast } = useToast();
-  const route = useRoute();
 
   useFocusEffect(
     useCallback(() => {
       setPosts([...feedPosts]);
-      const state = navigation.getState();
-      const feedRoute = state?.routes?.find(r => r.name === 'Feed');
-      const params = feedRoute?.params || {};
-      const { department, filter: routeFilter } = params;
-      if (department) {
-        setDeptFilter(department);
-        setFilter(routeFilter || 'Proceso');
-      } else {
-        setDeptFilter(null);
-        setFilter('Todos');
+      const p = route.params || {};
+      if (p.department) {
+        setDeptFilter(p.department);
+        setFilter(p.filter || 'Proceso');
       }
-    }, [])
+    }, [route.params])
   );
 
   const filtered = posts.filter(p => {
